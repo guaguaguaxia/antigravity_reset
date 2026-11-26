@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "app.antigravityreset/antigravity-reset",
+  "title": "Antigravity Reset",
+  "description": "Live Google Antigravity quota reset tracker, history, intervals, and multilingual announcements.",
+  "version": "1.0.0",
+  "websiteUrl": "https://antigravityreset.app",
+  "repository": {
+    "url": "https://github.com/guaguaguaxia/antigravity_reset",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://antigravityreset.app/mohan-avatar.png",
+      "mimeType": "image/png",
+      "sizes": ["256x256"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://antigravityreset.app/mcp"
+    }
+  ]
+}

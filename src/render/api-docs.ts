@@ -75,6 +75,19 @@ Content-Type: application/json
   "monitor": { "state": "live", "lastCheckAt": "...", "lastSuccessAt": "...", "intervalSeconds": 240 }
 }</pre>
         <p>Events pushed here are validated and merged into Cloudflare KV (<code>ANTIGRAVITY_KV</code>) without needing a redeploy.</p>
+
+        <h2 id="mcp">5. Model Context Protocol (MCP) Server</h2>
+        <p>Zero-auth remote Streamable HTTP MCP endpoint for Claude, Cursor, Windsurf, VS Code, and Antigravity clients:</p>
+        <pre class="docs-endpoint">POST https://antigravityreset.app/mcp</pre>
+        <p>Available read-only tools: <code>get_latest_reset</code>, <code>list_resets</code>, <code>search_resets</code>, <code>get_reset_stats</code>.</p>
+        <pre class="docs-endpoint">{
+  "mcpServers": {
+    "antigravity-reset": {
+      "type": "streamable-http",
+      "url": "https://antigravityreset.app/mcp"
+    }
+  }
+}</pre>
       </section>
     </main>
     ${renderFooter(locale)}

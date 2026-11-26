@@ -1,6 +1,7 @@
 import { loadDataset, normalizeDataset } from "./data/repository";
 import { LOCALES, localeFromPath, localePath, normalizeLocale, type Locale } from "./i18n";
 import { getReactionCount, handleApiRequest, type WorkerEnv } from "./api/handlers";
+import { handleMcpRequest } from "./mcp/server";
 import { renderApiDocsPage } from "./render/api-docs";
 import { renderRssFeed } from "./render/feed";
 import { renderHomePage } from "./render/html";
@@ -8,6 +9,7 @@ import { renderMarkdown } from "./render/markdown";
 
 const LANG_COOKIE = "antigravity-reset-language";
 const BASE_URL = "https://antigravityreset.app";
+const MCP_REGISTRY_AUTH_RECORD = "v=MCPv1; k=ed25519; p=pZGLQ3Lw6ug0u3JGSo12efJmNi3bWnoJt7AbNSNspbQ=";
 
 function parseLangCookie(cookieHeader: string | null): Locale | null {
   if (!cookieHeader) return null;
@@ -64,6 +66,22 @@ export default {
     if (url.hostname === "www.antigravityreset.app") {
       url.hostname = "antigravityreset.app";
       return Response.redirect(url.toString(), 301);
+    }
+
+    // Official MCP Registry HTTP domain ownership verification (must return 200 with zero redirects)
+    if (url.pathname === "/.well-known/mcp-registry-auth") {
+      return new Response(MCP_REGISTRY_AUTH_RECORD, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "public, max-age=300"
+        }
+      });
+    }
+
+    // Remote Streamable HTTP MCP server endpoint
+    if (url.pathname === "/mcp") {
+      return handleMcpRequest(request, env);
     }
 
     // Canonicalize trailing slashes on non-root GET/HEAD paths
