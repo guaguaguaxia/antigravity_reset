@@ -20,8 +20,11 @@ function parseLangCookie(cookieHeader: string | null): Locale | null {
   return null;
 }
 
-function renderSitemap(): string {
-  const today = new Date().toISOString().slice(0, 10);
+export function renderSitemap(lastModifiedIso: string | null = null): string {
+  const parsedMs = lastModifiedIso ? Date.parse(lastModifiedIso) : NaN;
+  const lastmod = Number.isFinite(parsedMs)
+    ? new Date(parsedMs).toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
   const hreflangs = [
     ...LOCALES.map(
       (loc) => `    <xhtml:link rel="alternate" hreflang="${loc}" href="${BASE_URL}${localePath(loc)}" />`
@@ -34,7 +37,7 @@ function renderSitemap(): string {
     return `  <url>
     <loc>${BASE_URL}${localePath(loc)}</loc>
 ${hreflangs}
-    <lastmod>${today}</lastmod>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>daily</changefreq>
     <priority>${priority}</priority>
   </url>`;
@@ -88,7 +91,9 @@ export default {
     }
 
     if (url.pathname === "/sitemap.xml") {
-      return new Response(renderSitemap(), {
+      const dataset = await loadDataset(env);
+      const payload = normalizeDataset(dataset, "en");
+      return new Response(renderSitemap(payload.stats.last_reset_at), {
         headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600" }
       });
     }

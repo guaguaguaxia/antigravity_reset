@@ -5,6 +5,7 @@ import { LOCALES } from "../src/i18n";
 import { renderRssFeed } from "../src/render/feed";
 import { renderHomePage } from "../src/render/html";
 import { renderMarkdown } from "../src/render/markdown";
+import { renderSitemap } from "../src/index";
 
 describe("Antigravity Reset repository and stats", () => {
   it("computes accurate stats from the 7 real @_mohansolo events", () => {
@@ -60,6 +61,20 @@ describe("SSR multi-language rendering", () => {
     const md = renderMarkdown(payload, "zh-CN");
     expect(md).toContain("Antigravity Reset");
     expect(md).toContain("2026-11-26T07:19:24.000Z");
+  });
+
+  it("renders valid sitemap.xml with all 5 locales, hreflang, and dataset lastmod", () => {
+    const payload = normalizeDataset(rawSeed, "en");
+    const xml = renderSitemap(payload.stats.last_reset_at);
+    expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+    expect(xml).toContain("<loc>https://antigravityreset.app/</loc>");
+    expect(xml).toContain("<loc>https://antigravityreset.app/zh-CN</loc>");
+    expect(xml).toContain("<loc>https://antigravityreset.app/zh-TW</loc>");
+    expect(xml).toContain("<loc>https://antigravityreset.app/ja</loc>");
+    expect(xml).toContain("<loc>https://antigravityreset.app/ko</loc>");
+    expect(xml).toContain('hreflang="x-default" href="https://antigravityreset.app/"');
+    expect(xml).toContain("<lastmod>2026-11-26</lastmod>");
   });
 
   it("handles empty event list safely in computeStats", () => {
