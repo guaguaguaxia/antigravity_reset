@@ -505,7 +505,7 @@
         el.classList.add("reset-plea-burst--avatar");
         const img = document.createElement("img");
         img.className = "reset-plea-burst-avatar";
-        img.src = "/antigravity-avatar.svg";
+        img.src = "/mohan-avatar.png?v=1";
         img.alt = "";
         img.decoding = "async";
         img.draggable = false;
@@ -641,7 +641,7 @@
           lastKnownAt = latest.announced_at;
           new Notification("Antigravity Reset", {
             body: latest.display_text || latest.text,
-            icon: "/antigravity-avatar.svg"
+            icon: "/mohan-avatar.png?v=1"
           });
         }
       } catch {}

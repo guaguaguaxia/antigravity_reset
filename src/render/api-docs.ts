@@ -22,19 +22,19 @@ export function renderApiDocsPage(locale: Locale = "en"): string {
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:url" content="${BASE_URL}/api/docs" />
-  <meta property="og:image" content="${BASE_URL}/og-image.png?v=1" />
+  <meta property="og:image" content="${BASE_URL}/og-image.png?v=2" />
   <meta property="og:image:type" content="image/png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
-  <meta name="twitter:image" content="${BASE_URL}/og-image.png?v=1" />
+  <meta name="twitter:image" content="${BASE_URL}/og-image.png?v=2" />
   <link rel="canonical" href="${BASE_URL}/api/docs" />
   <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" href="/favicon.ico" sizes="32x32" />
-  <link rel="icon" href="/antigravity-avatar.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.ico?v=2" sizes="32x32" />
+  <link rel="icon" href="/mohan-avatar.png?v=1" type="image/png" sizes="256x256" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/styles.css?v=2" />
+  <link rel="stylesheet" href="/styles.css?v=3" />
   ${renderThemeHeadScript()}
 </head>
 <body>

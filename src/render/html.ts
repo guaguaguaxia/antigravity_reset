@@ -289,7 +289,7 @@ function renderEventItems(events: NormalizedResetEvent[], locale: Locale, nowMs:
 
       return `
     <li class="log-item" data-event-id="${escapeHtml(ev.id)}">
-      <img class="log-avatar" src="/antigravity-avatar.svg" alt="" aria-hidden="true" loading="lazy" width="44" height="44" />
+      <img class="log-avatar" src="/mohan-avatar.png?v=1" alt="" aria-hidden="true" loading="lazy" width="44" height="44" />
       <div class="log-bubble">
         <div class="log-item-meta">
           <time class="log-item-time" datetime="${escapeHtml(ev.announced_at)}" data-role="relative-time" data-datetime="${escapeHtml(ev.announced_at)}">${escapeHtml(
@@ -469,7 +469,7 @@ export function renderMasthead(locale: Locale, isHome: boolean): string {
   return `  <header class="masthead">
     <div class="masthead-brand">
       <span class="masthead-avatar-wrap">
-        <img class="masthead-avatar" src="/antigravity-avatar.svg" alt="" aria-hidden="true" width="48" height="48" />
+        <img class="masthead-avatar" src="/mohan-avatar.png?v=1" alt="" aria-hidden="true" width="48" height="48" />
         <span class="masthead-sticker" data-role="mohan-sticker" aria-hidden="true"></span>
         <span class="masthead-sticker-tip" data-role="mohan-sticker-tip" aria-hidden="true"></span>
       </span>
@@ -711,7 +711,7 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
   <meta property="og:title" content="${escapeHtml(pageTitle)}" />
   <meta property="og:description" content="${escapeHtml(pageDescription)}" />
   <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
-  <meta property="og:image" content="${BASE_URL}/og-image.png?v=1" />
+  <meta property="og:image" content="${BASE_URL}/og-image.png?v=2" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:alt" content="${escapeHtml(t("Antigravity Reset quota tracker"))}" />
   <meta property="og:image:width" content="1200" />
@@ -719,15 +719,15 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(pageTitle)}" />
   <meta name="twitter:description" content="${escapeHtml(pageDescription)}" />
-  <meta name="twitter:image" content="${BASE_URL}/og-image.png?v=1" />
+  <meta name="twitter:image" content="${BASE_URL}/og-image.png?v=2" />
   <meta name="twitter:image:alt" content="${escapeHtml(t("Antigravity Reset quota tracker"))}" />
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
   <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" href="/favicon.ico" sizes="32x32" />
-  <link rel="icon" href="/antigravity-avatar.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" href="/favicon.ico?v=2" sizes="32x32" />
+  <link rel="icon" href="/mohan-avatar.png?v=1" type="image/png" sizes="256x256" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/styles.css?v=2" />
+  <link rel="stylesheet" href="/styles.css?v=3" />
   ${hreflangLinks}
   <link rel="alternate" type="text/markdown" title="Markdown" href="${escapeHtml(mdUrl)}" />
   <link rel="alternate" type="application/rss+xml" title="Antigravity Reset RSS" href="${BASE_URL}/feed.xml" />
@@ -880,7 +880,7 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
     locale
   )};</script>
   <script defer src="/site-shell.js?v=2"></script>
-  <script defer src="/app.js?v=2"></script>
+  <script defer src="/app.js?v=3"></script>
 </body>
 </html>`;
 }
