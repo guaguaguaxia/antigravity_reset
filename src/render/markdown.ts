@@ -3,10 +3,14 @@ import type { ResetPayload } from "../data/repository";
 
 export function renderMarkdown(payload: ResetPayload, locale: Locale): string {
   const t = createTranslator(locale);
+  const latestDate = payload.stats.last_reset_at ? payload.stats.last_reset_at.slice(0, 10) : "—";
   const lines: string[] = [
-    `# ${t("Antigravity Reset Tracker & History | Antigravity Reset")}`,
+    `# ${t("Antigravity Reset — Live Quota Reset Tracker & History")}`,
     "",
-    t("Track the latest Antigravity quota resets, browse reset history, and get notified when new resets are announced."),
+    t(
+      "Track {count} verified Google Antigravity quota resets (latest: {date}). Browse Gemini, Argon & all-model reset history and get live alerts.",
+      { count: payload.stats.total, date: latestDate }
+    ),
     "",
     `- ${t("Resets")}: ${payload.stats.total}`,
     `- ${t("Avg. reset interval")}: ${

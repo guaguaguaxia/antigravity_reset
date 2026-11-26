@@ -4,6 +4,7 @@ import {
   OG_LOCALES,
   createTranslator,
   getClientI18nBundle,
+  getFaqItems,
   localePath,
   type Locale
 } from "../i18n";
@@ -99,7 +100,7 @@ function renderLanguageLinks(current: Locale, persistPreference: boolean, autofo
   return LOCALES.map((loc) => {
     const isCurrent = loc === current;
     const base = localePath(loc);
-    const href = persistPreference || loc === "en" ? `${base}?lang=${loc}` : base;
+    const href = persistPreference ? `${base}?lang=${loc}` : base;
     const rel = href.includes("?") ? ' rel="nofollow"' : "";
     const aria = isCurrent ? ' aria-current="page"' : "";
     const auto = isCurrent && autofocusCurrent ? " autofocus" : "";
@@ -291,12 +292,12 @@ function renderEventItems(events: NormalizedResetEvent[], locale: Locale, nowMs:
       <img class="log-avatar" src="/antigravity-avatar.svg" alt="" aria-hidden="true" loading="lazy" width="44" height="44" />
       <div class="log-bubble">
         <div class="log-item-meta">
-          <span class="log-item-time" data-role="relative-time" data-datetime="${escapeHtml(ev.announced_at)}">${escapeHtml(
+          <time class="log-item-time" datetime="${escapeHtml(ev.announced_at)}" data-role="relative-time" data-datetime="${escapeHtml(ev.announced_at)}">${escapeHtml(
             formatRelative(Date.parse(ev.announced_at), nowMs, locale)
-          )}</span>
-          <span class="log-item-abs" data-role="absolute-time" data-datetime="${escapeHtml(
+          )}</time>
+          <time class="log-item-abs" datetime="${escapeHtml(ev.announced_at)}" data-role="absolute-time" data-datetime="${escapeHtml(
             ev.announced_at
-          )}">${escapeHtml(formatUtcTime(ev.announced_at, locale))}</span>
+          )}">${escapeHtml(formatUtcTime(ev.announced_at, locale))}</time>
           <span class="log-model-tags">${tagsHtml}</span>
         </div>
         <p class="log-item-text" data-role="tweet-display-text">${escapeHtml(ev.display_text)}</p>
@@ -345,6 +346,32 @@ function renderEventLog(events: NormalizedResetEvent[], locale: Locale, nowMs: n
     <p class="section-sub">${escapeHtml(t("Every announcement, preserved for history"))}</p>
   </div>
   <ol class="log-list">${headItems}</ol>${moreSection}
+</section>`;
+}
+
+function renderFaqSection(
+  locale: Locale,
+  faqItems: ReadonlyArray<{ question: string; answer: string }>
+): string {
+  const t = createTranslator(locale);
+  const itemsHtml = faqItems
+    .map(
+      (item) => `
+    <details class="faq-item">
+      <summary class="faq-question">${escapeHtml(item.question)}</summary>
+      <p class="faq-answer">${escapeHtml(item.answer)}</p>
+    </details>`
+    )
+    .join("");
+
+  return `
+<section class="faq-section" aria-labelledby="faq-heading">
+  <div class="section-head">
+    <h2 id="faq-heading">${escapeHtml(t("Frequently asked questions"))}</h2>
+    <p class="section-sub">${escapeHtml(t("Everything about Antigravity quota resets"))}</p>
+  </div>
+  <div class="faq-list">${itemsHtml}
+  </div>
 </section>`;
 }
 
@@ -520,9 +547,9 @@ export function renderFooter(locale: Locale, monitorLastSuccessAt?: string): str
     ${
       monitorLastSuccessAt
         ? `<p>${t("Last synced: {time}", {
-            time: `<span data-role="absolute-time" data-datetime="${escapeHtml(
+            time: `<time datetime="${escapeHtml(monitorLastSuccessAt)}" data-role="absolute-time" data-datetime="${escapeHtml(
               monitorLastSuccessAt
-            )}">${escapeHtml(formatUtcTime(monitorLastSuccessAt, locale))}</span>`
+            )}">${escapeHtml(formatUtcTime(monitorLastSuccessAt, locale))}</time>`
           })}</p>`
         : ""
     }
@@ -555,9 +582,9 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
     : t("Covers the Gemini model quota across Antigravity tiers for the announcement listed below.");
 
   const heroFigure = lastResetAt
-    ? `<span class="hero-figure" data-role="relative-time" data-skip-weeks data-datetime="${escapeHtml(
+    ? `<time class="hero-figure" datetime="${escapeHtml(lastResetAt)}" data-role="relative-time" data-skip-weeks data-datetime="${escapeHtml(
         lastResetAt
-      )}">${escapeHtml(formatRelative(lastResetMs, nowMs, locale, { skipWeeks: true }))}</span>`
+      )}">${escapeHtml(formatRelative(lastResetMs, nowMs, locale, { skipWeeks: true }))}</time>`
     : `<span class="hero-figure hero-figure--muted">${escapeHtml(t("No resets tracked yet"))}</span>`;
 
   const heroSub = lastResetAt
@@ -567,18 +594,32 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
         )}</strong><span class="term-tooltip" id="scope-reset-tip" role="tooltip">${escapeHtml(
           scopeTooltip
         )}</span></span><span aria-hidden="true">·</span></span>
-        <span data-role="absolute-time" data-datetime="${escapeHtml(lastResetAt)}">${escapeHtml(
+        <time datetime="${escapeHtml(lastResetAt)}" data-role="absolute-time" data-datetime="${escapeHtml(lastResetAt)}">${escapeHtml(
           formatUtcTime(lastResetAt, locale)
-        )}</span>
+        )}</time>
       </p>`
     : `<p class="hero-sub">${escapeHtml(t("Once @_mohansolo announces one, it'll show up here within minutes."))}</p>`;
 
   const canonicalUrl = `${BASE_URL}${localePath(locale)}`;
   const mdUrl = locale === "en" ? `${BASE_URL}/en.md` : `${BASE_URL}${localePath(locale)}.md`;
-  const pageTitle = t("Antigravity Reset Tracker & History | Antigravity Reset");
+  const latestDateShort = lastResetAt ? lastResetAt.slice(0, 10) : new Date(nowMs).toISOString().slice(0, 10);
+  const pageTitle = t("Antigravity Reset — Live Quota Reset Tracker & History");
   const pageDescription = t(
-    "Track the latest Antigravity quota resets, browse reset history, and get notified when new resets are announced."
+    "Track {count} verified Google Antigravity quota resets (latest: {date}). Browse Gemini, Argon & all-model reset history and get live alerts.",
+    { count: stats.total, date: latestDateShort }
   );
+
+  const faqItems = getFaqItems(locale, {
+    total: stats.total,
+    avgIntervalDays: stats.avg_interval_days !== null ? stats.avg_interval_days.toFixed(1) : "—",
+    longestWaitDays: stats.longest_wait_days !== null ? stats.longest_wait_days.toFixed(1) : "—"
+  });
+
+  const monitorMs = Date.parse(monitor.lastSuccessAt);
+  const effectiveSyncAt =
+    Number.isFinite(lastResetMs) && (!Number.isFinite(monitorMs) || lastResetMs > monitorMs)
+      ? lastResetAt!
+      : monitor.lastSuccessAt;
 
   const hreflangLinks = [
     ...LOCALES.map(
@@ -593,13 +634,65 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
 
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": `${canonicalUrl}#website`,
-    url: canonicalUrl,
-    name: "Antigravity Reset",
-    description: pageDescription,
-    inLanguage: locale,
-    sameAs: ["https://x.com/_mohansolo"]
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${BASE_URL}/#website`,
+        url: `${BASE_URL}/`,
+        name: "Antigravity Reset",
+        description: pageDescription,
+        inLanguage: locale
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${canonicalUrl}#webpage`,
+        url: canonicalUrl,
+        name: pageTitle,
+        description: pageDescription,
+        inLanguage: locale,
+        isPartOf: { "@id": `${BASE_URL}/#website` },
+        ...(lastResetAt ? { dateModified: lastResetAt } : {}),
+        about: {
+          "@type": "SoftwareApplication",
+          name: "Google Antigravity",
+          applicationCategory: "DeveloperApplication"
+        }
+      },
+      {
+        "@type": "Dataset",
+        "@id": `${canonicalUrl}#dataset`,
+        name: "Google Antigravity Quota Reset History",
+        description: pageDescription,
+        url: canonicalUrl,
+        inLanguage: locale,
+        isAccessibleForFree: true,
+        ...(lastResetAt ? { dateModified: lastResetAt } : {}),
+        distribution: [
+          {
+            "@type": "DataDownload",
+            encodingFormat: "application/json",
+            contentUrl: `${BASE_URL}/api/resets?locale=${encodeURIComponent(locale)}`
+          },
+          {
+            "@type": "DataDownload",
+            encodingFormat: "application/rss+xml",
+            contentUrl: `${BASE_URL}/feed.xml`
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${canonicalUrl}#faq`,
+        mainEntity: faqItems.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.answer
+          }
+        }))
+      }
+    ]
   });
 
   const clientI18n = JSON.stringify(getClientI18nBundle(locale)).replace(/</g, "\\u003c");
@@ -618,22 +711,23 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
   <meta property="og:title" content="${escapeHtml(pageTitle)}" />
   <meta property="og:description" content="${escapeHtml(pageDescription)}" />
   <meta property="og:url" content="${escapeHtml(canonicalUrl)}" />
-  <meta property="og:image" content="${BASE_URL}/og-image.svg" />
+  <meta property="og:image" content="${BASE_URL}/og-image.png?v=1" />
+  <meta property="og:image:type" content="image/png" />
   <meta property="og:image:alt" content="${escapeHtml(t("Antigravity Reset quota tracker"))}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(pageTitle)}" />
   <meta name="twitter:description" content="${escapeHtml(pageDescription)}" />
-  <meta name="twitter:image" content="${BASE_URL}/og-image.svg" />
+  <meta name="twitter:image" content="${BASE_URL}/og-image.png?v=1" />
   <meta name="twitter:image:alt" content="${escapeHtml(t("Antigravity Reset quota tracker"))}" />
   <link rel="canonical" href="${escapeHtml(canonicalUrl)}" />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
   <link rel="icon" href="/antigravity-avatar.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />
+  <link rel="stylesheet" href="/styles.css?v=2" />
   ${hreflangLinks}
   <link rel="alternate" type="text/markdown" title="Markdown" href="${escapeHtml(mdUrl)}" />
   <link rel="alternate" type="application/rss+xml" title="Antigravity Reset RSS" href="${BASE_URL}/feed.xml" />
@@ -777,15 +871,16 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
 
         ${renderContributionGraph(events, locale, nowMs)}
         ${renderEventLog(events, locale, nowMs)}
+        ${renderFaqSection(locale, faqItems)}
       </main>
-      ${renderFooter(locale, monitor.lastSuccessAt)}
+      ${renderFooter(locale, effectiveSyncAt)}
     </div>
   </div>
   <script>window.__ANTIGRAVITY_I18N__=${clientI18n};window.__ANTIGRAVITY_LOCALE__=${JSON.stringify(
     locale
   )};</script>
-  <script src="/site-shell.js"></script>
-  <script src="/app.js"></script>
+  <script defer src="/site-shell.js?v=2"></script>
+  <script defer src="/app.js?v=2"></script>
 </body>
 </html>`;
 }

@@ -1,42 +1,70 @@
 import type { Locale } from "../i18n";
 import { renderFooter, renderMasthead, renderThemeHeadScript } from "./html";
 
+const BASE_URL = "https://antigravityreset.app";
+
 export function renderApiDocsPage(locale: Locale = "en"): string {
+  const title = "API Docs — Antigravity Reset Public API";
+  const description =
+    "Free public JSON API, RSS feed, and Markdown endpoints for Google Antigravity quota reset history and statistics. No API key required.";
+
   return `<!doctype html>
 <html lang="${locale}" data-theme-scope="site">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#fff4dd" />
-  <title>API Docs | Antigravity Reset</title>
+  <title>${title}</title>
+  <meta name="description" content="${description}" />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Antigravity Reset" />
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:url" content="${BASE_URL}/api/docs" />
+  <meta property="og:image" content="${BASE_URL}/og-image.png?v=1" />
+  <meta property="og:image:type" content="image/png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${BASE_URL}/og-image.png?v=1" />
+  <link rel="canonical" href="${BASE_URL}/api/docs" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/favicon.ico" sizes="32x32" />
   <link rel="icon" href="/antigravity-avatar.svg" type="image/svg+xml" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />
+  <link rel="stylesheet" href="/styles.css?v=2" />
   ${renderThemeHeadScript()}
 </head>
 <body>
   <div class="page">
     ${renderMasthead(locale, false)}
     <main>
+      <div class="docs-attribution" role="note">
+        <strong>Free to use — please link back.</strong>
+        This API is free to use and needs no key. In return, please credit
+        <a href="${BASE_URL}/">antigravityreset.app</a> with a link wherever you display this data, e.g.
+        <code>Data from &lt;a href="${BASE_URL}/"&gt;Antigravity Reset&lt;/a&gt;</code>
+      </div>
+
       <section class="docs-card">
-        <h2>Antigravity Reset Public API</h2>
+        <h1>Antigravity Reset Public API</h1>
         <p>Free, no API key required. Designed for dashboards, bots, and future crawler integrations.</p>
 
-        <h3>1. Fetch Reset History &amp; Stats</h3>
+        <h2>1. Fetch Reset History &amp; Stats</h2>
         <pre class="docs-endpoint">GET /api/resets?locale=zh-CN</pre>
         <p>Supported <code>locale</code> values: <code>en</code>, <code>zh-CN</code>, <code>zh-TW</code>, <code>ja</code>, <code>ko</code>.</p>
 
-        <h3>2. RSS Feed &amp; Markdown</h3>
+        <h2>2. RSS Feed &amp; Markdown</h2>
         <pre class="docs-endpoint">GET /feed.xml
 GET /zh-CN.md</pre>
 
-        <h3>3. Reactions Counter</h3>
+        <h2>3. Reactions Counter</h2>
         <pre class="docs-endpoint">GET /api/reset-requests
 POST /api/reset-requests  {"n": 1}</pre>
 
-        <h3>4. Crawler / Sync Ingestion Endpoint</h3>
+        <h2>4. Crawler / Sync Ingestion Endpoint</h2>
         <pre class="docs-endpoint">POST /api/admin/resets
 Authorization: Bearer &lt;ADMIN_TOKEN&gt;
 Content-Type: application/json
@@ -50,7 +78,7 @@ Content-Type: application/json
     </main>
     ${renderFooter(locale)}
   </div>
-  <script src="/site-shell.js"></script>
+  <script defer src="/site-shell.js?v=2"></script>
 </body>
 </html>`;
 }

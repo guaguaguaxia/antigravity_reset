@@ -5,7 +5,8 @@ import { LOCALES } from "../src/i18n";
 import { renderRssFeed } from "../src/render/feed";
 import { renderHomePage } from "../src/render/html";
 import { renderMarkdown } from "../src/render/markdown";
-import { renderSitemap } from "../src/index";
+import { renderApiDocsPage } from "../src/render/api-docs";
+import worker, { renderSitemap } from "../src/index";
 
 describe("Antigravity Reset repository and stats", () => {
   it("computes accurate stats from the 7 real @_mohansolo events", () => {
@@ -33,8 +34,8 @@ describe("Antigravity Reset repository and stats", () => {
   });
 });
 
-describe("SSR multi-language rendering", () => {
-  it("renders all 5 locales with Antigravity Reset branding and zero Codex leftovers", () => {
+describe("SSR multi-language rendering & SEO", () => {
+  it("renders all 5 locales with Antigravity Reset branding, FAQ, JSON-LD @graph, and self-hosted assets", () => {
     const nowMs = Date.parse("2026-11-26T10:15:00.000Z");
 
     for (const locale of LOCALES) {
@@ -44,26 +45,52 @@ describe("SSR multi-language rendering", () => {
       expect(html).toContain(`<html lang="${locale}"`);
       expect(html).toContain("Antigravity Reset");
       expect(html).toContain(`hreflang="x-default" href="https://antigravityreset.app/"`);
+      expect(html).toContain('property="og:image" content="https://antigravityreset.app/og-image.png?v=1"');
+      expect(html).toContain('<link rel="apple-touch-icon" href="/apple-touch-icon.png" />');
+      expect(html).toContain('<link rel="icon" href="/favicon.ico" sizes="32x32" />');
+      expect(html).toContain('<link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />');
+      expect(html).not.toContain("fonts.googleapis.com");
+      expect(html).toContain('<script defer src="/site-shell.js?v=2"></script>');
+      expect(html).toContain('<script defer src="/app.js?v=2"></script>');
+      const footerMatch = html.match(/<nav class="site-footer-langs"[\s\S]*?<\/nav>/);
+      expect(footerMatch).toBeTruthy();
+      expect(footerMatch![0]).toContain('<a href="/" lang="en" hreflang="en"');
+      expect(footerMatch![0]).not.toContain("?lang=en");
+      expect(footerMatch![0]).not.toContain('rel="nofollow"');
+      expect(html).toContain('<time class="hero-figure" datetime="2026-11-26T07:19:24.000Z"');
+      expect(html).toContain('class="faq-section"');
       expect(html).toContain('data-date="2026-11-26"');
       expect(html).toContain('data-date="2026-10-16"');
       expect(html).toContain('<details class="log-more">');
       expect(html.toLowerCase()).not.toContain("codex");
       expect(html.toLowerCase()).not.toContain("thsottiaux");
+
+      const ldMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+      expect(ldMatch).toBeTruthy();
+      const ld = JSON.parse(ldMatch![1]) as { "@graph": Array<{ "@type": string; sameAs?: unknown }> };
+      const types = ld["@graph"].map((node) => node["@type"]);
+      expect(types).toEqual(["WebSite", "WebPage", "Dataset", "FAQPage"]);
+      expect(ld["@graph"][0].sameAs).toBeUndefined();
     }
   });
 
-  it("renders valid RSS feed and markdown summaries", () => {
+  it("renders valid RSS feed, markdown summaries, and SEO-complete API docs", () => {
     const payload = normalizeDataset(rawSeed, "zh-CN");
     const rss = renderRssFeed(payload);
-    expect(rss).toContain("<rss version=\"2.0\"");
+    expect(rss).toContain('<rss version="2.0"');
     expect(rss).toContain("https://x.com/_mohansolo/status/2125851902009311306");
 
     const md = renderMarkdown(payload, "zh-CN");
     expect(md).toContain("Antigravity Reset");
     expect(md).toContain("2026-11-26T07:19:24.000Z");
+
+    const docsHtml = renderApiDocsPage("en");
+    expect(docsHtml).toContain("<h1>Antigravity Reset Public API</h1>");
+    expect(docsHtml).toContain('<link rel="canonical" href="https://antigravityreset.app/api/docs" />');
+    expect(docsHtml).toContain('<meta name="description"');
   });
 
-  it("renders valid sitemap.xml with all 5 locales, hreflang, and dataset lastmod", () => {
+  it("renders valid sitemap.xml with all 5 locales, /api/docs, hreflang, and dataset lastmod", () => {
     const payload = normalizeDataset(rawSeed, "en");
     const xml = renderSitemap(payload.stats.last_reset_at);
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
@@ -73,8 +100,24 @@ describe("SSR multi-language rendering", () => {
     expect(xml).toContain("<loc>https://antigravityreset.app/zh-TW</loc>");
     expect(xml).toContain("<loc>https://antigravityreset.app/ja</loc>");
     expect(xml).toContain("<loc>https://antigravityreset.app/ko</loc>");
+    expect(xml).toContain("<loc>https://antigravityreset.app/api/docs</loc>");
     expect(xml).toContain('hreflang="x-default" href="https://antigravityreset.app/"');
     expect(xml).toContain("<lastmod>2026-11-26</lastmod>");
+  });
+
+  it("redirects trailing slash paths and sets public edge Cache-Control on HTML", async () => {
+    const dummyEnv = { ASSETS: { fetch: async () => new Response("Not Found", { status: 404 }) } as unknown as Fetcher };
+
+    const slashRes = await worker.fetch(new Request("https://antigravityreset.app/zh-CN/"), dummyEnv);
+    expect(slashRes.status).toBe(301);
+    expect(slashRes.headers.get("Location")).toBe("https://antigravityreset.app/zh-CN");
+
+    const pageRes = await worker.fetch(new Request("https://antigravityreset.app/zh-CN"), dummyEnv);
+    expect(pageRes.status).toBe(200);
+    expect(pageRes.headers.get("Cache-Control")).toBe(
+      "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+    );
+    expect(pageRes.headers.get("Vary")).toBeNull();
   });
 
   it("handles empty event list safely in computeStats", () => {

@@ -38,17 +38,29 @@ export function localeFromPath(pathname: string): Locale {
 }
 
 const MESSAGES = {
-  "Antigravity Reset Tracker & History | Antigravity Reset": {
-    "zh-CN": "Antigravity Reset 额度重置追踪与历史记录 | Antigravity Reset",
-    "zh-TW": "Antigravity Reset 額度重置追蹤與歷史紀錄 | Antigravity Reset",
-    ja: "Antigravity Reset クォータリセット追跡・履歴 | Antigravity Reset",
-    ko: "Antigravity Reset 쿼터 리셋 추적 및 기록 | Antigravity Reset"
+  "Antigravity Reset — Live Quota Reset Tracker & History": {
+    "zh-CN": "Antigravity Reset — 实时额度重置追踪与历史记录",
+    "zh-TW": "Antigravity Reset — 即時額度重置追蹤與歷史紀錄",
+    ja: "Antigravity Reset — リアルタイムクォータリセット追跡・履歴",
+    ko: "Antigravity Reset — 실시간 쿼터 리셋 추적 및 기록"
   },
-  "Track the latest Antigravity quota resets, browse reset history, and get notified when new resets are announced.": {
-    "zh-CN": "追踪最新的 Antigravity 额度重置，查看历史重置记录，并在新重置公布时收到通知。",
-    "zh-TW": "追蹤最新的 Antigravity 額度重置，查看歷史重置紀錄，並在新重置公布時收到通知。",
-    ja: "最新の Antigravity クォータリセットを追跡し、リセット履歴の確認や新規発表の通知を受け取れます。",
-    ko: "최신 Antigravity 쿼터 리셋을 추적하고, 리셋 기록을 확인하며, 새 리셋 발표 시 알림을 받으세요."
+  "Track {count} verified Google Antigravity quota resets (latest: {date}). Browse Gemini, Argon & all-model reset history and get live alerts.": {
+    "zh-CN": "追踪 {count} 次 Google Antigravity 官方额度重置记录（最近：{date}）。查看 Gemini、Argon 及全模型额度刷新历史，并订阅实时通知。",
+    "zh-TW": "追蹤 {count} 次 Google Antigravity 官方額度重置紀錄（最近：{date}）。查看 Gemini、Argon 與全模型額度刷新歷史，並訂閱即時通知。",
+    ja: "Google Antigravity の公式クォータリセット {count} 件を追跡中（最新: {date}）。Gemini・Argon・全モデルのリセット履歴確認やライブ通知に対応。",
+    ko: "검증된 Google Antigravity 쿼터 리셋 {count}건(최신: {date})을 추적합니다. Gemini·Argon·전체 모델 리셋 기록을 확인하고 실시간 알림을 받아보세요."
+  },
+  "Frequently asked questions": {
+    "zh-CN": "常见问题",
+    "zh-TW": "常見問題",
+    ja: "よくある質問",
+    ko: "자주 묻는 질문"
+  },
+  "Everything about Antigravity quota resets": {
+    "zh-CN": "关于 Antigravity 额度重置的常见说明",
+    "zh-TW": "關於 Antigravity 額度重置的常見說明",
+    ja: "Antigravity クォータリセットに関する解説",
+    ko: "Antigravity 쿼터 리셋에 대한 안내"
   },
   "Antigravity Reset quota tracker": {
     "zh-CN": "Antigravity Reset 额度重置追踪器",
@@ -671,4 +683,130 @@ export function getClientI18nBundle(locale: Locale): Record<string, string> {
     bundle[key] = t(key);
   }
   return bundle;
+}
+
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface FaqStatsSummary {
+  total: number;
+  avgIntervalDays: string;
+  longestWaitDays: string;
+}
+
+export function getFaqItems(locale: Locale, stats: FaqStatsSummary): FaqItem[] {
+  switch (locale) {
+    case "zh-CN":
+      return [
+        {
+          question: "什么是 Antigravity 额度重置（Antigravity Reset）？",
+          answer:
+            "Antigravity 额度重置是指 Antigravity 团队（通常由 @_mohansolo 在 X 公布）在模型升级、周年纪念、节假日或缓存优化等节点，面向全体或特定档位用户额外清零并恢复使用额度的官方活动，独立于你账号自身的常规滚动刷新周期。"
+        },
+        {
+          question: "Antigravity 额度一般多久重置一次？",
+          answer: `根据已收录的 ${stats.total} 次官方重置公告，历史平均重置间隔约为 ${stats.avgIntervalDays} 天，最长一次等待间隔为 ${stats.longestWaitDays} 天。实际重置时间不固定，通常配合重大版本更新或节点事件触发。`
+        },
+        {
+          question: "每次重置涵盖哪些 Antigravity 模型？",
+          answer:
+            "多数官方重置覆盖 Gemini 模型额度，部分里程碑公告（例如 Antigravity 一周年纪念或早期补偿）还会同时重置 Argon 或全模型（All Models）额度；页面上方的热力图与每条公告标签均会区分“Gemini 常规”与“全模型 / 多模型”。"
+        },
+        {
+          question: "如何第一时间收到下一次 Antigravity 重置通知？",
+          answer:
+            "你可以点击顶部的“浏览器”开启页面内实时推送、“RSS”订阅 /feed.xml、填写邮箱订阅邮件通知，或直接调用免费的公开 JSON 接口（/api/resets）接入自己的脚本与机器人。"
+        }
+      ];
+    case "zh-TW":
+      return [
+        {
+          question: "什麼是 Antigravity 額度重置（Antigravity Reset）？",
+          answer:
+            "Antigravity 額度重置是指 Antigravity 團隊（通常由 @_mohansolo 在 X 公布）在模型升級、週年紀念、節假日或快取最佳化等節點，為全體或指定方案使用者額外歸零並恢復使用額度的官方公告，獨立於帳號本身的常規週期刷新。"
+        },
+        {
+          question: "Antigravity 額度通常多久重置一次？",
+          answer: `根據目前已收錄的 ${stats.total} 次官方重置公告，歷史平均重置間隔約為 ${stats.avgIntervalDays} 天，最長等待間隔為 ${stats.longestWaitDays} 天。實際時間不固定，通常隨重大模型更新或紀念活動發布。`
+        },
+        {
+          question: "每次重置涵蓋哪些 Antigravity 模型？",
+          answer:
+            "多數官方重置涵蓋 Gemini 模型額度，部分里程碑公告（例如 Antigravity 一週年紀念）則會同時重置 Argon 或全模型（All Models）額度；頁面上的熱力圖與每則公告標籤皆會標示對應模型範圍。"
+        },
+        {
+          question: "如何第一時間取得下一次 Antigravity 重置通知？",
+          answer:
+            "你可以點擊頁面上方的「瀏覽器」開啟即時通知、透過「RSS」訂閱 /feed.xml、登記電子郵件提醒，或直接串接免費公開 JSON API（/api/resets）。"
+        }
+      ];
+    case "ja":
+      return [
+        {
+          question: "Antigravity クォータリセット（Antigravity Reset）とは何ですか？",
+          answer:
+            "Antigravity チーム（主に @_mohansolo が X で発表）がモデルのアップグレードや記念日、キャッシュ改善などのタイミングでユーザー全体の利用枠を特別にリセットする公式アナウンスです。通常ローリング回復とは別枠で行われます。"
+        },
+        {
+          question: "Antigravity のクォータはどのくらいの頻度でリセットされますか？",
+          answer: `これまでに記録された ${stats.total} 回の公式リセットに基づく平均間隔は約 ${stats.avgIntervalDays} 日、最長間隔は ${stats.longestWaitDays} 日です。定期スケジュールではなく、大型リリースやイベントに合わせて不定期に実施されます。`
+        },
+        {
+          question: "どのモデル（Gemini・Argon・全モデル）がリセット対象になりますか？",
+          answer:
+            "多くは Gemini クォータが対象ですが、1周年などの節目や特別なアナウンスでは Argon を含む複数モデルや全モデル（All Models）がリセットされることもあります。履歴グラフと各ログのタグで対象モデルを確認できます。"
+        },
+        {
+          question: "次のリセット通知を受け取るにはどうすればよいですか？",
+          answer:
+            "ページ上部の「ブラウザ」通知ボタン、RSS フィード（/feed.xml）、メール登録のほか、認証不要の公開 JSON API（/api/resets）をツールや Bot から参照できます。"
+        }
+      ];
+    case "ko":
+      return [
+        {
+          question: "Antigravity 쿼터 리셋(Antigravity Reset)이란 무엇인가요?",
+          answer:
+            "Antigravity 팀(주로 @_mohansolo의 X 게시물로 공지)이 모델 업그레이드, 출시 기념일, 캐시 성능 개선 등의 시점에 사용자 사용량을 일괄 초기화해 주는 공식 리셋입니다. 계정별 기본 주기 초기화와는 별도로 제공됩니다."
+        },
+        {
+          question: "Antigravity 쿼터는 보통 얼마나 자주 리셋되나요?",
+          answer: `현재까지 기록된 ${stats.total}회의 공식 리셋 기준 평균 간격은 약 ${stats.avgIntervalDays}일이며, 최장 대기 간격은 ${stats.longestWaitDays}일입니다. 고정 주기가 아닌 주요 모델 업데이트 및 이벤트에 맞춰 비정기적으로 진행됩니다.`
+        },
+        {
+          question: "어떤 모델(Gemini, Argon, 전체 모델)이 리셋 대상에 포함되나요?",
+          answer:
+            "대부분 Gemini 쿼터를 대상으로 하며, 1주년 기념 등 주요 공지에서는 Argon을 포함한 다중 모델이나 전체 모델(All Models)이 함께 리셋됩니다. 히트맵과 각 공지 카드의 모델 태그에서 범위를 바로 확인할 수 있습니다."
+        },
+        {
+          question: "다음 리셋 소식을 바로 받아보거나 데이터를 활용할 수 있나요?",
+          answer:
+            "상단의 브라우저 알림, RSS 피드(/feed.xml), 이메일 구독을 통해 알림을 받을 수 있으며, 별도 키 없이 공개 JSON API(/api/resets)를 자유롭게 연동할 수 있습니다."
+        }
+      ];
+    default:
+      return [
+        {
+          question: "What is an Antigravity quota reset?",
+          answer:
+            "An Antigravity quota reset is an official bonus quota refill announced by the Antigravity team (tracked from @_mohansolo on X) during model upgrades, anniversaries, holidays, or caching improvements—separate from your normal rolling quota window."
+        },
+        {
+          question: "How often does Antigravity reset usage quotas?",
+          answer: `Across ${stats.total} tracked announcements, Antigravity has averaged ${stats.avgIntervalDays} days between resets, with a longest wait of ${stats.longestWaitDays} days. Resets are unscheduled and typically follow major releases or milestones.`
+        },
+        {
+          question: "Which Antigravity models are covered by a reset?",
+          answer:
+            "Most announcements reset Gemini quota across Antigravity tiers (including Neon, Carbon, and Hydrogen releases), while milestone announcements also reset Argon or all models. Both the heatmap and log cards tag the exact models covered."
+        },
+        {
+          question: "How can I get notified or query Antigravity reset history?",
+          answer:
+            "Use the browser alert toggle, subscribe via RSS (/feed.xml) or email at the top of the page, or fetch structured JSON directly from the free public API at /api/resets."
+        }
+      ];
+  }
 }

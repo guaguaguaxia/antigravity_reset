@@ -47,6 +47,12 @@ ${hreflangs}
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls}
+  <url>
+    <loc>${BASE_URL}/api/docs</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>`;
 }
 
@@ -58,6 +64,13 @@ export default {
     if (url.hostname === "www.antigravityreset.app") {
       url.hostname = "antigravityreset.app";
       return Response.redirect(url.toString(), 301);
+    }
+
+    // Canonicalize trailing slashes on non-root GET/HEAD paths
+    if (url.pathname.length > 1 && url.pathname.endsWith("/") && (request.method === "GET" || request.method === "HEAD")) {
+      const target = new URL(url.toString());
+      target.pathname = url.pathname.replace(/\/+$/, "");
+      return Response.redirect(target.toString(), 301);
     }
 
     // Explicit ?lang= switch sets cookie and redirects to clean locale path
@@ -73,9 +86,11 @@ export default {
 
     // API endpoints
     if (url.pathname === "/api/docs") {
-      const cookieLocale = parseLangCookie(request.headers.get("Cookie")) ?? "en";
-      return new Response(renderApiDocsPage(cookieLocale), {
-        headers: { "Content-Type": "text/html; charset=utf-8" }
+      return new Response(renderApiDocsPage("en"), {
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=300, s-maxage=3600"
+        }
       });
     }
 
@@ -146,8 +161,7 @@ export default {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
           "Content-Language": locale,
-          "Cache-Control": "private, no-store",
-          Vary: "Cookie"
+          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
         }
       });
     }

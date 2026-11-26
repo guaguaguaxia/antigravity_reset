@@ -1,12 +1,17 @@
 {
   "name": "Antigravity Reset",
   "short_name": "Antigravity Reset",
-  "description": "Track the latest Antigravity quota resets and browse reset history.",
+  "description": "Track the latest Google Antigravity quota resets and browse reset history.",
   "display": "standalone",
   "theme_color": "#fff4dd",
   "background_color": "#fff4dd",
   "start_url": "/",
   "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
     {
       "src": "/antigravity-avatar.svg",
       "sizes": "any",
