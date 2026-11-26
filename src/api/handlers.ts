@@ -138,7 +138,7 @@ export async function handleApiRequest(request: Request, env: WorkerEnv, url: UR
       if (!Number.isSafeInteger(count) || count < 1) {
         const list = await env.ANTIGRAVITY_KV.list({ prefix: "presence:", limit: 1000 });
         count = Math.max(1, list.keys.filter((k) => k.name !== "presence:summary").length);
-        await env.ANTIGRAVITY_KV.put("presence:summary", String(count), { expirationTtl: 15 });
+        await env.ANTIGRAVITY_KV.put("presence:summary", String(count), { expirationTtl: 60 });
       }
       return jsonResponse({ count, windowSeconds: WINDOW_SECONDS }, 200, {
         "Cache-Control": "no-store"
