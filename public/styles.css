@@ -1977,6 +1977,11 @@ a:focus-visible {
   color: var(--ink);
 }
 
+.faq-question:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -4px;
+}
+
 .faq-answer {
   margin: 0;
   padding: 0 18px 16px;
