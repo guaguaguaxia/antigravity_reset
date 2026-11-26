@@ -1,0 +1,674 @@
+export const LOCALES = ["en", "zh-CN", "zh-TW", "ja", "ko"] as const;
+export type Locale = (typeof LOCALES)[number];
+
+export const LOCALE_NAMES: Record<Locale, string> = {
+  en: "English",
+  "zh-CN": "简体中文",
+  "zh-TW": "繁體中文",
+  ja: "日本語",
+  ko: "한국어"
+};
+
+export const OG_LOCALES: Record<Locale, string> = {
+  en: "en_US",
+  "zh-CN": "zh_CN",
+  "zh-TW": "zh_TW",
+  ja: "ja_JP",
+  ko: "ko_KR"
+};
+
+export function localePath(locale: Locale): string {
+  return locale === "en" ? "/" : `/${locale}`;
+}
+
+export function normalizeLocale(input: string | null | undefined): Locale | null {
+  if (!input) return null;
+  const trimmed = input.trim();
+  return (LOCALES as readonly string[]).includes(trimmed) ? (trimmed as Locale) : null;
+}
+
+export function localeFromPath(pathname: string): Locale {
+  const cleaned = pathname.replace(/\.md$/, "").replace(/\/+$/, "") || "/";
+  for (const locale of LOCALES) {
+    if (localePath(locale) === cleaned) {
+      return locale;
+    }
+  }
+  return "en";
+}
+
+const MESSAGES = {
+  "Antigravity Reset Tracker & History | Antigravity Reset": {
+    "zh-CN": "Antigravity Reset 额度重置追踪与历史记录 | Antigravity Reset",
+    "zh-TW": "Antigravity Reset 額度重置追蹤與歷史紀錄 | Antigravity Reset",
+    ja: "Antigravity Reset クォータリセット追跡・履歴 | Antigravity Reset",
+    ko: "Antigravity Reset 쿼터 리셋 추적 및 기록 | Antigravity Reset"
+  },
+  "Track the latest Antigravity quota resets, browse reset history, and get notified when new resets are announced.": {
+    "zh-CN": "追踪最新的 Antigravity 额度重置，查看历史重置记录，并在新重置公布时收到通知。",
+    "zh-TW": "追蹤最新的 Antigravity 額度重置，查看歷史重置紀錄，並在新重置公布時收到通知。",
+    ja: "最新の Antigravity クォータリセットを追跡し、リセット履歴の確認や新規発表の通知を受け取れます。",
+    ko: "최신 Antigravity 쿼터 리셋을 추적하고, 리셋 기록을 확인하며, 새 리셋 발표 시 알림을 받으세요."
+  },
+  "Antigravity Reset quota tracker": {
+    "zh-CN": "Antigravity Reset 额度重置追踪器",
+    "zh-TW": "Antigravity Reset 額度重置追蹤器",
+    ja: "Antigravity Reset クォータトラッカー",
+    ko: "Antigravity Reset 쿼터 트래커"
+  },
+  Language: {
+    "zh-CN": "语言",
+    "zh-TW": "語言",
+    ja: "言語",
+    ko: "언어"
+  },
+  "Follow @_mohansolo on X": {
+    "zh-CN": "在 X 关注 @_mohansolo",
+    "zh-TW": "在 X 追蹤 @_mohansolo",
+    ja: "X で @_mohansolo をフォロー",
+    ko: "X에서 @_mohansolo 팔로우"
+  },
+  "Toggle color theme": {
+    "zh-CN": "切换明暗主题",
+    "zh-TW": "切換明暗主題",
+    ja: "カラーテーマを切り替える",
+    ko: "밝은 테마와 어두운 테마 전환"
+  },
+  "Switch to dark mode": {
+    "zh-CN": "切换到深色模式",
+    "zh-TW": "切換至深色模式",
+    ja: "ダークモードに切り替える",
+    ko: "어두운 테마로 전환"
+  },
+  "Switch to light mode": {
+    "zh-CN": "切换到浅色模式",
+    "zh-TW": "切換至淺色模式",
+    ja: "ライトモードに切り替える",
+    ko: "밝은 테마로 전환"
+  },
+  "{count} here now": {
+    "zh-CN": "{count} 人在线",
+    "zh-TW": "{count} 人在線",
+    ja: "{count} 人がオンライン",
+    ko: "지금 {count}명 접속 중"
+  },
+  "Connecting to live visitor count": {
+    "zh-CN": "正在连接实时在线人数",
+    "zh-TW": "正在連線至即時在線人數",
+    ja: "リアルタイムのオンライン人数に接続中",
+    ko: "실시간 접속자 수에 연결 중"
+  },
+  "Live visitor count unavailable": {
+    "zh-CN": "暂时无法获取实时在线人数",
+    "zh-TW": "暫時無法取得即時在線人數",
+    ja: "リアルタイムのオンライン人数を取得できません",
+    ko: "실시간 접속자 수를 확인할 수 없습니다"
+  },
+  "We watch {account} for Antigravity reset announcements, so you don't have to.": {
+    "zh-CN": "我们帮你关注 {account} 发布的 Antigravity 额度重置消息，省得你反复刷推。",
+    "zh-TW": "我們幫你追蹤 {account} 發布的 Antigravity 額度重置消息，省得你反覆刷動態。",
+    ja: "{account} の Antigravity クォータリセット情報をチェックして、お知らせします。",
+    ko: "{account}의 Antigravity 쿼터 리셋 소식을 대신 확인해 드립니다."
+  },
+  "Current status": {
+    "zh-CN": "当前状态",
+    "zh-TW": "目前狀態",
+    ja: "現在の状況",
+    ko: "현재 상태"
+  },
+  "Reset notifications": {
+    "zh-CN": "重置通知",
+    "zh-TW": "重置通知",
+    ja: "リセット通知",
+    ko: "리셋 알림"
+  },
+  "Get browser notifications when Antigravity resets": {
+    "zh-CN": "Antigravity 重置时接收浏览器通知",
+    "zh-TW": "Antigravity 重置時接收瀏覽器通知",
+    ja: "Antigravity のリセットをブラウザ通知で受け取る",
+    ko: "Antigravity 리셋 시 브라우저 알림 받기"
+  },
+  "Stop browser notifications for Antigravity resets": {
+    "zh-CN": "关闭 Antigravity 重置的浏览器通知",
+    "zh-TW": "關閉 Antigravity 重置的瀏覽器通知",
+    ja: "Antigravity リセットのブラウザ通知を停止する",
+    ko: "Antigravity 리셋 브라우저 알림 끄기"
+  },
+  browser: {
+    "zh-CN": "浏览器",
+    "zh-TW": "瀏覽器",
+    ja: "ブラウザ",
+    ko: "브라우저"
+  },
+  "browser on": {
+    "zh-CN": "浏览器通知已开启",
+    "zh-TW": "瀏覽器通知已開啟",
+    ja: "ブラウザ通知オン",
+    ko: "브라우저 알림 켜짐"
+  },
+  "Subscribe via RSS feed": {
+    "zh-CN": "通过 RSS 订阅重置通知",
+    "zh-TW": "透過 RSS 訂閱重置通知",
+    ja: "RSS フィードで購読する",
+    ko: "RSS 피드로 구독하기"
+  },
+  "Get reset alerts by email": {
+    "zh-CN": "通过邮件接收 Antigravity 重置通知",
+    "zh-TW": "透過電子郵件接收 Antigravity 重置通知",
+    ja: "メールで Antigravity リセット通知を受け取る",
+    ko: "이메일로 Antigravity 리셋 알림 받기"
+  },
+  email: {
+    "zh-CN": "邮件",
+    "zh-TW": "電子郵件",
+    ja: "メール",
+    ko: "이메일"
+  },
+  "Email address": {
+    "zh-CN": "邮箱地址",
+    "zh-TW": "電子郵件地址",
+    ja: "メールアドレス",
+    ko: "이메일 주소"
+  },
+  "send link": {
+    "zh-CN": "订阅通知",
+    "zh-TW": "訂閱通知",
+    ja: "登録する",
+    ko: "구독하기"
+  },
+  "sending…": {
+    "zh-CN": "提交中…",
+    "zh-TW": "送出中…",
+    ja: "送信中…",
+    ko: "전송 중…"
+  },
+  "email on": {
+    "zh-CN": "邮件通知已开启",
+    "zh-TW": "郵件通知已開啟",
+    ja: "メール通知オン",
+    ko: "이메일 알림 켜짐"
+  },
+  "You're on the list. We'll notify you when new Antigravity resets land.": {
+    "zh-CN": "已加入订阅列表，后续有新的 Antigravity 重置消息时会通知你。",
+    "zh-TW": "已加入訂閱清單，後續有新的 Antigravity 重置消息時會通知你。",
+    ja: "登録が完了しました。新しい Antigravity リセットが発表され次第お知らせします。",
+    ko: "구독이 완료됐습니다. 새로운 Antigravity 리셋 소식이 올라오면 알려드릴게요."
+  },
+  "That didn't send. Please try again.": {
+    "zh-CN": "提交失败，请重试。",
+    "zh-TW": "送出失敗，請再試一次。",
+    ja: "送信できませんでした。もう一度お試しください。",
+    ko: "전송하지 못했습니다. 다시 시도해 주세요."
+  },
+  "Enter a valid email address": {
+    "zh-CN": "请输入有效的邮箱地址",
+    "zh-TW": "請輸入有效的電子郵件地址",
+    ja: "有効なメールアドレスを入力してください",
+    ko: "올바른 이메일 주소를 입력하세요"
+  },
+  "No ping for you: notifications are blocked here.": {
+    "zh-CN": "通知被浏览器屏蔽了，请先在浏览器设置中允许通知。",
+    "zh-TW": "通知被瀏覽器封鎖了，請先在瀏覽器設定中允許通知。",
+    ja: "通知がブロックされています。ブラウザの設定で許可してください。",
+    ko: "알림이 차단되어 있습니다. 브라우저 설정에서 알림을 허용해 주세요."
+  },
+  "Deal. The next reset pings you first.": {
+    "zh-CN": "说定了，下次重置时会在页面保持打开期间第一时间通知你。",
+    "zh-TW": "說定了，下次重置時會在頁面開啟期間第一時間通知你。",
+    ja: "了解。次のリセットをいち早くお知らせします。",
+    ko: "좋아요. 다음 리셋 때 바로 알려드릴게요."
+  },
+  "Okay. You'll find out like everyone else.": {
+    "zh-CN": "已关闭通知，下次就靠你自己发现了。",
+    "zh-TW": "已關閉通知，下次就靠你自己發現了。",
+    ja: "通知をオフにしました。次は自分で見つけてくださいね。",
+    ko: "알림을 껐습니다. 다음 소식은 직접 확인해 주세요."
+  },
+  "That didn't take. Please try again.": {
+    "zh-CN": "操作失败，请重试。",
+    "zh-TW": "操作失敗，請再試一次。",
+    ja: "うまくいきませんでした。もう一度お試しください。",
+    ko: "처리하지 못했습니다. 다시 시도해 주세요."
+  },
+  "Time display": {
+    "zh-CN": "时间显示",
+    "zh-TW": "時間顯示",
+    ja: "時刻表示",
+    ko: "시간 표시"
+  },
+  "Mohan time": {
+    "zh-CN": "Mohan 时间",
+    "zh-TW": "Mohan 時間",
+    ja: "Mohan の時間",
+    ko: "Mohan 시간"
+  },
+  "Local time": {
+    "zh-CN": "本地时间",
+    "zh-TW": "本地時間",
+    ja: "現地時間",
+    ko: "현지 시간"
+  },
+  "Switch to Mohan time": {
+    "zh-CN": "切换到 Mohan 时间",
+    "zh-TW": "切換至 Mohan 時間",
+    ja: "Mohan の時間に切り替える",
+    ko: "Mohan 시간으로 전환"
+  },
+  "Switch to local time": {
+    "zh-CN": "切换到本地时间",
+    "zh-TW": "切換至本地時間",
+    ja: "現地時間に切り替える",
+    ko: "현지 시간으로 전환"
+  },
+  "{time} for Mohan": {
+    "zh-CN": "Mohan 现在 {time}",
+    "zh-TW": "Mohan 現在 {time}",
+    ja: "Mohan のいま {time}",
+    ko: "Mohan의 지금 {time}"
+  },
+  "Mohan is probably asleep. Let him dream of quota resets.": {
+    "zh-CN": "Mohan 大概睡了吧，祝他做个重置的好梦。",
+    "zh-TW": "Mohan 應該睡了，讓他夢見額度重置吧。",
+    ja: "Mohan はたぶん寝ています。クォータリセットの夢を見させてあげて。",
+    ko: "Mohan은 아마 자고 있어요. 리셋 꿈을 꾸게 두세요."
+  },
+  "Coffee first. Resets later.": {
+    "zh-CN": "先喝咖啡，重置稍后。",
+    "zh-TW": "先喝咖啡，重置稍後。",
+    ja: "まずコーヒー、リセットはあとで。",
+    ko: "커피 먼저, 리셋은 나중에."
+  },
+  "Mohan is probably shipping Antigravity right now.": {
+    "zh-CN": "Mohan 这会儿大概在发布 Antigravity 新功能。",
+    "zh-TW": "Mohan 這會兒應該在打造 Antigravity。",
+    ja: "Mohan はいま Antigravity を開発・出荷中のはず。",
+    ko: "Mohan은 아마 지금 Antigravity를 출시하는 중이에요."
+  },
+  "Lunch break. The quotas can wait.": {
+    "zh-CN": "午饭时间，额度的事等会儿再说。",
+    "zh-TW": "午餐時間，額度的事等等再說。",
+    ja: "昼休み。クォータはあとで。",
+    ko: "점심 시간. 쿼터는 나중에."
+  },
+  "Golden hour in California.": {
+    "zh-CN": "加州的黄金时刻。",
+    "zh-TW": "加州的黃金時刻。",
+    ja: "カリフォルニアのゴールデンアワー。",
+    ko: "캘리포니아의 골든 아워."
+  },
+  "Late night. Just one more deploy…": {
+    "zh-CN": "深夜了，再发一版就睡……",
+    "zh-TW": "深夜了，再發一版就睡……",
+    ja: "深夜。もうひとつリリースしたら…",
+    ko: "늦은 밤. 배포 하나만 더…"
+  },
+  "It's the weekend. Even Mohan touches grass.": {
+    "zh-CN": "周末了，Mohan 也得出门透透气。",
+    "zh-TW": "週末了，Mohan 也得出去透透氣。",
+    ja: "週末です。Mohan だって外に出ます。",
+    ko: "주말이에요. Mohan도 밖에 나가죠."
+  },
+  "Latest Antigravity reset": {
+    "zh-CN": "最近一次 Antigravity 重置",
+    "zh-TW": "最近一次 Antigravity 重置",
+    ja: "直近の Antigravity リセット",
+    ko: "최근 Antigravity 리셋"
+  },
+  "No resets tracked yet": {
+    "zh-CN": "还没有重置记录",
+    "zh-TW": "還沒有重置紀錄",
+    ja: "リセットの記録はまだありません",
+    ko: "아직 리셋 기록이 없습니다"
+  },
+  "Once @_mohansolo announces one, it'll show up here within minutes.": {
+    "zh-CN": "@_mohansolo 发布重置公告后，更新就会显示在这里。",
+    "zh-TW": "@_mohansolo 發布重置公告後，更新就會顯示在這裡。",
+    ja: "@_mohansolo がリセットを発表すると、ここに表示されます。",
+    ko: "@_mohansolo가 리셋을 발표하면 여기에 표시됩니다."
+  },
+  "Gemini quota reset": {
+    "zh-CN": "Gemini 额度重置",
+    "zh-TW": "Gemini 額度重置",
+    ja: "Gemini クォータリセット",
+    ko: "Gemini 쿼터 리셋"
+  },
+  "All-model / multi-model reset": {
+    "zh-CN": "全模型 / 多模型重置",
+    "zh-TW": "全模型 / 多模型重置",
+    ja: "全モデル / マルチモデルリセット",
+    ko: "전체 / 다중 모델 리셋"
+  },
+  "Covers the Gemini model quota across Antigravity tiers for the announcement listed below.": {
+    "zh-CN": "涵盖 Antigravity 各档位用户的 Gemini 模型使用额度重置。",
+    "zh-TW": "涵蓋 Antigravity 各方案使用者的 Gemini 模型使用額度重置。",
+    ja: "Antigravity の各プランにおける Gemini モデルのクォータを対象としたリセットです。",
+    ko: "Antigravity 등급 전반의 Gemini 모델 쿼터가 리셋되었습니다."
+  },
+  "Covers all models or multiple model families (such as Gemini & Argon) across Antigravity.": {
+    "zh-CN": "涵盖 Antigravity 全部模型或多个模型系列（例如 Gemini 与 Argon）的额度重置。",
+    "zh-TW": "涵蓋 Antigravity 全部模型或多個模型系列（例如 Gemini 與 Argon）的額度重置。",
+    ja: "Antigravity の全モデル、または複数モデル（Gemini や Argon など）のクォータを対象としたリセットです。",
+    ko: "Antigravity의 전체 모델 또는 여러 모델군(Gemini, Argon 등)의 쿼터가 리셋되었습니다."
+  },
+  "Reset reactions": {
+    "zh-CN": "重置互动",
+    "zh-TW": "重置互動",
+    ja: "リセットへのリアクション",
+    ko: "리셋 반응"
+  },
+  "Reset reaction count unavailable": {
+    "zh-CN": "互动次数暂不可用",
+    "zh-TW": "互動次數暫時無法取得",
+    ja: "リアクション数を取得できません",
+    ko: "반응 수를 불러올 수 없습니다"
+  },
+  "{count} reactions since last reset": {
+    "zh-CN": "上次重置以来共 {count} 次互动",
+    "zh-TW": "上次重置以來共 {count} 次互動",
+    ja: "前回のリセット以降のリアクション：{count}件",
+    ko: "지난 리셋 이후 반응 {count}회"
+  },
+  "Say thanks for the reset": {
+    "zh-CN": "感谢这次重置",
+    "zh-TW": "感謝這次重置",
+    ja: "リセットに感謝する",
+    ko: "리셋에 감사하기"
+  },
+  "Beg for a reset": {
+    "zh-CN": "求一次重置",
+    "zh-TW": "求一次重置",
+    ja: "リセットをお願いする",
+    ko: "리셋 부탁하기"
+  },
+  thanks: {
+    "zh-CN": "感谢",
+    "zh-TW": "感謝",
+    ja: "感謝",
+    ko: "감사해요"
+  },
+  beg: {
+    "zh-CN": "求重置",
+    "zh-TW": "求重置",
+    ja: "お願い",
+    ko: "리셋 부탁해요"
+  },
+  thx: {
+    "zh-CN": "谢谢",
+    "zh-TW": "謝謝",
+    ja: "感謝",
+    ko: "감사"
+  },
+  pls: {
+    "zh-CN": "求求了",
+    "zh-TW": "拜託了",
+    ja: "お願い",
+    ko: "부탁"
+  },
+  Resets: {
+    "zh-CN": "重置次数",
+    "zh-TW": "重置次數",
+    ja: "リセット数",
+    ko: "리셋 횟수"
+  },
+  "Avg. reset interval": {
+    "zh-CN": "平均重置间隔",
+    "zh-TW": "平均重置間隔",
+    ja: "平均リセット間隔",
+    ko: "평균 리셋 간격"
+  },
+  "Avg. wait": {
+    "zh-CN": "平均等待",
+    "zh-TW": "平均等待",
+    ja: "平均待ち時間",
+    ko: "평균 대기"
+  },
+  "Longest wait": {
+    "zh-CN": "最长等待",
+    "zh-TW": "最長等待",
+    ja: "最長待ち時間",
+    ko: "최장 대기"
+  },
+  "{days}d": {
+    "zh-CN": "{days}天",
+    "zh-TW": "{days}天",
+    ja: "{days}日",
+    ko: "{days}일"
+  },
+  "Antigravity reset history": {
+    "zh-CN": "Antigravity 重置历史",
+    "zh-TW": "Antigravity 重置歷史",
+    ja: "Antigravity リセット履歴",
+    ko: "Antigravity 리셋 기록"
+  },
+  regular: {
+    "zh-CN": "Gemini 常规",
+    "zh-TW": "Gemini 常規",
+    ja: "Gemini 通常",
+    ko: "Gemini 일반"
+  },
+  all: {
+    "zh-CN": "全模型 / 多模型",
+    "zh-TW": "全模型 / 多模型",
+    ja: "全モデル / 複数",
+    ko: "전체 / 다중 모델"
+  },
+  "no reset": {
+    "zh-CN": "未重置",
+    "zh-TW": "未重置",
+    ja: "リセットなし",
+    ko: "리셋 없음"
+  },
+  "No reset": {
+    "zh-CN": "未重置",
+    "zh-TW": "未重置",
+    ja: "リセットなし",
+    ko: "리셋 없음"
+  },
+  "{count} {type} reset": {
+    "zh-CN": "{count} 次{type}重置",
+    "zh-TW": "{count} 次{type}重置",
+    ja: "{type}リセット{count}回",
+    ko: "{type} 리셋 {count}회"
+  },
+  "{count} {type} resets": {
+    "zh-CN": "{count} 次{type}重置",
+    "zh-TW": "{count} 次{type}重置",
+    ja: "{type}リセット{count}回",
+    ko: "{type} 리셋 {count}회"
+  },
+  "{label} on {date} (UTC)": {
+    "zh-CN": "{date}（UTC）：{label}",
+    "zh-TW": "{date}（UTC）：{label}",
+    ja: "{date}（UTC）：{label}",
+    ko: "{date} (UTC): {label}"
+  },
+  "{count} resets in one day. Feast.": {
+    "zh-CN": "一天重置 {count} 次。盛宴。",
+    "zh-TW": "一天重置 {count} 次。盛宴。",
+    ja: "1日に{count}回。大盤振る舞い。",
+    ko: "하루에 리셋 {count}회. 풍성한 하루네요."
+  },
+  "No reset. We persevered.": {
+    "zh-CN": "没有重置。我们坚持住了。",
+    "zh-TW": "沒有重置。我們堅持住了。",
+    ja: "リセットなし。耐え抜きました。",
+    ko: "리셋 없음. 버텼습니다."
+  },
+  "No reset. He was busy.": {
+    "zh-CN": "没有重置。他在忙。",
+    "zh-TW": "沒有重置。他在忙。",
+    ja: "リセットなし。忙しかったのでしょう。",
+    ko: "리셋 없음. 바빴나 봅니다."
+  },
+  "No reset. The feed was quiet.": {
+    "zh-CN": "没有重置。推文也很安静。",
+    "zh-TW": "沒有重置。動態也很安靜。",
+    ja: "リセットなし。タイムラインも静かでした。",
+    ko: "리셋 없음. 타임라인도 조용했습니다."
+  },
+  "No reset. We refreshed anyway.": {
+    "zh-CN": "没有重置。但我们还是刷新了。",
+    "zh-TW": "沒有重置。但我們還是重新整理了。",
+    ja: "リセットなし。それでも更新しました。",
+    ko: "리셋 없음. 그래도 새로고침은 했습니다."
+  },
+  "No reset. Character-building day.": {
+    "zh-CN": "没有重置。又是磨炼意志的一天。",
+    "zh-TW": "沒有重置。又是磨練意志的一天。",
+    ja: "リセットなし。忍耐力が鍛えられた日。",
+    ko: "리셋 없음. 인내심을 기른 하루."
+  },
+  "Antigravity reset announcements": {
+    "zh-CN": "Antigravity 重置公告",
+    "zh-TW": "Antigravity 重置公告",
+    ja: "Antigravity リセットのお知らせ",
+    ko: "Antigravity 리셋 발표"
+  },
+  "Every announcement, preserved for history": {
+    "zh-CN": "每次公告，都留有记录",
+    "zh-TW": "每次公告，都留有紀錄",
+    ja: "すべての発表を記録",
+    ko: "모든 발표를 기록합니다"
+  },
+  "Nothing yet. The timeline is quiet. Too quiet.": {
+    "zh-CN": "还没有消息。时间线很安静，安静得有点过头了。",
+    "zh-TW": "還沒有消息。時間軸很安靜，安靜得有點過頭了。",
+    ja: "まだ何もありません。静かです。静かすぎるくらい。",
+    ko: "아직 소식이 없네요. 타임라인이 조용합니다. 너무 조용하네요."
+  },
+  "View on X &rarr;": {
+    "zh-CN": "在 X 查看 &rarr;",
+    "zh-TW": "在 X 查看 &rarr;",
+    ja: "X で見る &rarr;",
+    ko: "X에서 보기 &rarr;"
+  },
+  "Show all {count} resets": {
+    "zh-CN": "查看全部 {count} 次重置",
+    "zh-TW": "查看全部 {count} 次重置",
+    ja: "全{count}回のリセットを表示",
+    ko: "리셋 {count}회 모두 보기"
+  },
+  "Show fewer": {
+    "zh-CN": "收起",
+    "zh-TW": "收合",
+    ja: "折りたたむ",
+    ko: "접기"
+  },
+  "All Models": {
+    "zh-CN": "全模型",
+    "zh-TW": "全模型",
+    ja: "全モデル",
+    ko: "전체 모델"
+  },
+  Verified: {
+    "zh-CN": "已核实",
+    "zh-TW": "已核實",
+    ja: "確認済み",
+    ko: "확인됨"
+  },
+  "just now": {
+    "zh-CN": "刚刚",
+    "zh-TW": "剛剛",
+    ja: "たった今",
+    ko: "방금"
+  },
+  "Date unavailable": {
+    "zh-CN": "日期不可用",
+    "zh-TW": "日期無法取得",
+    ja: "日付を取得できません",
+    ko: "날짜를 불러올 수 없습니다"
+  },
+  "Data from @_mohansolo's posts on X, tracked for Antigravity Reset. Not affiliated with Google.": {
+    "zh-CN": "数据整理自 @_mohansolo 在 X 发布的公告，专为 Antigravity Reset 追踪展示。本站与 Google 无关联。",
+    "zh-TW": "資料整理自 @_mohansolo 在 X 發布的公告，專為 Antigravity Reset 追蹤展示。本站與 Google 無關聯。",
+    ja: "データは @_mohansolo の X 投稿をもとに Antigravity Reset 用に記録しています。Google とは関係ありません。",
+    ko: "데이터는 @_mohansolo의 X 게시물을 바탕으로 Antigravity Reset에서 기록합니다. Google과는 관련이 없습니다."
+  },
+  "Mohan, if you're reading this: no pressure.": {
+    "zh-CN": "Mohan，如果你看到这里：别有压力。",
+    "zh-TW": "Mohan，如果你看到這裡：別有壓力。",
+    ja: "Mohan、これを読んでいたら：気にしないでね。",
+    ko: "Mohan, 혹시 이걸 보고 있다면 부담 갖지 마세요."
+  },
+  "Want the data? There's free public {api}, {rss}, and {md}.": {
+    "zh-CN": "想使用这些数据？我们提供免费的公开 {api}、{rss} 和 {md}。",
+    "zh-TW": "想使用這些資料？我們提供免費的公開 {api}、{rss} 與 {md}。",
+    ja: "データは無料の公開 {api}、{rss}、{md} で利用できます。",
+    ko: "데이터가 필요하신가요? 무료 공개 {api}, {rss}, {md}를 이용해 보세요."
+  },
+  "Last synced: {time}": {
+    "zh-CN": "最近同步：{time}",
+    "zh-TW": "最近同步：{time}",
+    ja: "最終同期：{time}",
+    ko: "최근 동기화: {time}"
+  }
+} as const satisfies Record<string, Record<Exclude<Locale, "en">, string>>;
+
+export type MessageKey = keyof typeof MESSAGES;
+
+export function createTranslator(locale: Locale) {
+  return (key: MessageKey, params: Record<string, string | number> = {}): string => {
+    const template =
+      locale === "en" ? key : (MESSAGES[key]?.[locale as Exclude<Locale, "en">] ?? key);
+    return template.replace(/\{(\w+)\}/g, (_, token: string) =>
+      token in params ? String(params[token]) : `{${token}}`
+    );
+  };
+}
+
+/** Export the subset of keys needed by client-side interactive scripts. */
+export function getClientI18nBundle(locale: Locale): Record<string, string> {
+  const t = createTranslator(locale);
+  const clientKeys: MessageKey[] = [
+    "Switch to dark mode",
+    "Switch to light mode",
+    "Mohan time",
+    "Local time",
+    "Switch to Mohan time",
+    "Switch to local time",
+    "{time} for Mohan",
+    "Mohan is probably asleep. Let him dream of quota resets.",
+    "Coffee first. Resets later.",
+    "Mohan is probably shipping Antigravity right now.",
+    "Lunch break. The quotas can wait.",
+    "Golden hour in California.",
+    "Late night. Just one more deploy…",
+    "It's the weekend. Even Mohan touches grass.",
+    "just now",
+    "Date unavailable",
+    "No reset. We persevered.",
+    "No reset. He was busy.",
+    "No reset. The feed was quiet.",
+    "No reset. We refreshed anyway.",
+    "No reset. Character-building day.",
+    "{count} resets in one day. Feast.",
+    "Gemini quota reset",
+    "All-model / multi-model reset",
+    "Say thanks for the reset",
+    "Beg for a reset",
+    "thanks",
+    "beg",
+    "thx",
+    "pls",
+    "Reset reaction count unavailable",
+    "{count} reactions since last reset",
+    "browser",
+    "browser on",
+    "Get browser notifications when Antigravity resets",
+    "Stop browser notifications for Antigravity resets",
+    "No ping for you: notifications are blocked here.",
+    "Deal. The next reset pings you first.",
+    "Okay. You'll find out like everyone else.",
+    "That didn't take. Please try again.",
+    "sending…",
+    "email on",
+    "You're on the list. We'll notify you when new Antigravity resets land.",
+    "That didn't send. Please try again.",
+    "Enter a valid email address"
+  ];
+  const bundle: Record<string, string> = {};
+  for (const key of clientKeys) {
+    bundle[key] = t(key);
+  }
+  return bundle;
+}

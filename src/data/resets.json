@@ -1,0 +1,80 @@
+{
+  "events": [
+    {
+      "id": "2125851902009311306",
+      "announcedAt": "2026-11-26T07:19:24.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2125851902009311306",
+      "text": "Resetting Gemini quota for all Antigravity users for Thanksgiving!\n\nWe’re very thankful for all of our users ❤️\n\nWe’re growing very quickly and are working tirelessly to make sure you all have a great experience!",
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "models": ["Gemini"],
+      "verified": true
+    },
+    {
+      "id": "2124960419429458207",
+      "announcedAt": "2026-11-23T20:16:58.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2124960419429458207",
+      "text": "Resetting Gemini quotas for everyone on Antigravity because we’re upgrading models across tiers!\n\nPaid Pro users will now have access to Carbon and Hydrogen will be available to all users as promised!\n\nAnd as always, keep swarming with Neon 🚀",
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "models": ["Gemini"],
+      "verified": true
+    },
+    {
+      "id": "2124070033534161407",
+      "announcedAt": "2026-11-21T09:18:53.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2124070033534161407",
+      "text": "Reset everyone’s Gemini quota on Antigravity.\n\nThe caching improvements have increased the amount you can get done in quota by 22%. Enjoy building with Neon over the weekend!",
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "models": ["Gemini"],
+      "verified": true
+    },
+    {
+      "id": "2122836883877347836",
+      "announcedAt": "2026-11-17T23:38:48.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2122836883877347836",
+      "text": "One more thing…\n\nIn honor of Antigravity turning 1, we’re resetting quota for everyone across all models!",
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "models": [],
+      "verified": true
+    },
+    {
+      "id": "2121380918355234957",
+      "announcedAt": "2026-11-13T23:13:18.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2121380918355234957",
+      "text": "To mark a week of relentless shipping, we’re resetting everyone’s Gemini quota on Antigravity!\n\nGo build something amazing with swarms 🚀",
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "models": ["Gemini"],
+      "verified": true
+    },
+    {
+      "id": "2118855362518675720",
+      "announcedAt": "2026-11-06T23:57:39.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2118855362518675720",
+      "text": "Resetting everyone’s Gemini and Argon quota on Antigravity.",
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "models": ["Gemini", "Argon"],
+      "verified": true
+    },
+    {
+      "id": "2111220356178751860",
+      "announcedAt": "2026-10-16T22:18:52.000Z",
+      "sourceUrl": "https://x.com/_mohansolo/status/2111220356178751860",
+      "text": "Resetting Argon and Gemini model quotas for everyone. Keep building through the weekend!",
+      "models": ["Gemini", "Argon"],
+      "product": "Antigravity",
+      "author": "_mohansolo",
+      "verified": true
+    }
+  ],
+  "monitor": {
+    "state": "stale",
+    "lastCheckAt": "2026-11-08T00:16:44.143Z",
+    "lastSuccessAt": "2026-11-08T00:16:44.143Z",
+    "intervalSeconds": 240
+  }
+}

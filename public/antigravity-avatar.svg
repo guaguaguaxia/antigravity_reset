@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Antigravity Reset">
+  <defs>
+    <clipPath id="circle-clip">
+      <circle cx="64" cy="64" r="64" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circle-clip)">
+    <rect width="128" height="128" fill="#ffd84d" />
+    <circle cx="24" cy="24" r="5" fill="#26201a" fill-opacity="0.08" />
+    <circle cx="52" cy="18" r="4" fill="#26201a" fill-opacity="0.08" />
+    <circle cx="96" cy="26" r="5" fill="#26201a" fill-opacity="0.08" />
+    <circle cx="106" cy="96" r="5" fill="#26201a" fill-opacity="0.08" />
+    <circle cx="22" cy="98" r="4" fill="#26201a" fill-opacity="0.08" />
+
+    <!-- Orbital ring -->
+    <ellipse
+      cx="64"
+      cy="68"
+      rx="46"
+      ry="17"
+      transform="rotate(-18 64 68)"
+      fill="none"
+      stroke="#26201a"
+      stroke-width="6"
+      stroke-linecap="round"
+    />
+
+    <!-- Main stylized floating A emblem with hard shadow -->
+    <path
+      d="M67 27 L98 95 L81 95 L74.5 79 L59.5 79 L53 95 L36 95 Z M67 51 L61.5 66 L72.5 66 Z"
+      fill="#26201a"
+      transform="translate(4 4)"
+    />
+    <path
+      d="M64 24 L95 92 L78 92 L71.5 76 L56.5 76 L50 92 L33 92 Z M64 48 L58.5 63 L69.5 63 Z"
+      fill="#fffdf7"
+      stroke="#26201a"
+      stroke-width="5.5"
+      stroke-linejoin="round"
+    />
+
+    <!-- Coral sparkle -->
+    <path
+      d="M96 27 L99.5 35.5 L108 39 L99.5 42.5 L96 51 L92.5 42.5 L84 39 L92.5 35.5 Z"
+      fill="#ff5c2b"
+      stroke="#26201a"
+      stroke-width="3.5"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>
