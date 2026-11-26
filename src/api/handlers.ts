@@ -5,20 +5,26 @@ import {
   validateIngestPayload
 } from "../data/repository";
 import { normalizeLocale } from "../i18n";
+import { handleXWebhook } from "../webhook/x-webhook";
 
 export interface WorkerEnv {
   ASSETS: Fetcher;
   ANTIGRAVITY_KV?: KVNamespace;
   ADMIN_TOKEN?: string;
+  WEBHOOK_SECRET?: string;
+  APIMART_API_KEY?: string;
+  APIMART_BASE_URL?: string;
+  APIMART_MODEL?: string;
+  ALLOWED_X_AUTHORS?: string;
 }
 
-const CORS_HEADERS = {
+export const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Webhook-Secret"
 };
 
-function jsonResponse(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
+export function jsonResponse(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
@@ -29,7 +35,7 @@ function jsonResponse(data: unknown, status = 200, extraHeaders: Record<string, 
   });
 }
 
-async function constantTimeEqual(a: string, b: string): Promise<boolean> {
+export async function constantTimeEqual(a: string, b: string): Promise<boolean> {
   const enc = new TextEncoder();
   const [hashA, hashB] = await Promise.all([
     crypto.subtle.digest("SHA-256", enc.encode(a)),
@@ -61,6 +67,10 @@ export async function handleApiRequest(request: Request, env: WorkerEnv, url: UR
   }
 
   const path = url.pathname;
+
+  if (path === "/api/webhook/x" || path.startsWith("/api/webhook/x/")) {
+    return handleXWebhook(request, env, url);
+  }
 
   if (path === "/api/resets" && request.method === "GET") {
     const locale = normalizeLocale(url.searchParams.get("locale")) ?? "en";

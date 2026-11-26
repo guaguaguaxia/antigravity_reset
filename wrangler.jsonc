@@ -13,6 +13,11 @@
       "enabled": true
     }
   },
+  "vars": {
+    "APIMART_BASE_URL": "https://api.apimart.ai/v1",
+    "APIMART_MODEL": "gpt-6-luna",
+    "ALLOWED_X_AUTHORS": "_mohansolo"
+  },
   "kv_namespaces": [
     {
       "binding": "ANTIGRAVITY_KV",

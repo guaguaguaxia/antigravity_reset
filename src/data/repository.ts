@@ -1,5 +1,5 @@
 import seedData from "./resets.json";
-import { getLocalizedEventText } from "./translations";
+import { getLocalizedEventText, type EventTranslations } from "./translations";
 import type { Locale } from "../i18n";
 
 export interface RawResetEvent {
@@ -11,6 +11,7 @@ export interface RawResetEvent {
   author: string;
   models: string[];
   verified: boolean;
+  translations?: EventTranslations;
 }
 
 export interface RawMonitorState {
@@ -103,6 +104,12 @@ function isValidIsoTimestamp(value: unknown): value is string {
   return typeof value === "string" && Number.isFinite(Date.parse(value));
 }
 
+function isValidTranslations(value: unknown): boolean {
+  if (value === undefined) return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return Object.values(value).every((v) => typeof v === "string");
+}
+
 function isValidEvent(item: unknown): item is RawResetEvent {
   if (!item || typeof item !== "object") return false;
   const candidate = item as Record<string, unknown>;
@@ -117,7 +124,8 @@ function isValidEvent(item: unknown): item is RawResetEvent {
     typeof candidate.author === "string" &&
     Array.isArray(candidate.models) &&
     candidate.models.every((m) => typeof m === "string") &&
-    typeof candidate.verified === "boolean"
+    typeof candidate.verified === "boolean" &&
+    isValidTranslations(candidate.translations)
   );
 }
 
@@ -182,7 +190,7 @@ export function normalizeDataset(dataset: RawDataset, locale: Locale): ResetPayl
     announced_at: new Date(Date.parse(ev.announcedAt)).toISOString(),
     source_url: ev.sourceUrl,
     text: ev.text,
-    display_text: getLocalizedEventText(ev.id, ev.text, locale),
+    display_text: getLocalizedEventText(ev.id, ev.text, locale, ev.translations),
     product: ev.product,
     author: ev.author,
     models: ev.models,

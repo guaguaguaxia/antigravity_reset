@@ -1,6 +1,8 @@
 import type { Locale } from "../i18n";
 
-export const EVENT_TRANSLATIONS: Record<string, Partial<Record<Exclude<Locale, "en">, string>>> = {
+export type EventTranslations = Partial<Record<Exclude<Locale, "en">, string>>;
+
+export const EVENT_TRANSLATIONS: Record<string, EventTranslations> = {
   "2125851902009311306": {
     "zh-CN": "感恩节之际，为所有 Antigravity 用户重置 Gemini 额度！\n\n非常感谢所有用户 ❤️\n\n我们正在飞速成长，也在马不停蹄地努力，为大家带来更好的使用体验！",
     "zh-TW": "感恩節之際，為所有 Antigravity 使用者重置 Gemini 額度！\n\n非常感謝每一位使用者 ❤️\n\n我們正在快速成長，也正全力以赴確保大家都有出色的體驗！",
@@ -45,7 +47,14 @@ export const EVENT_TRANSLATIONS: Record<string, Partial<Record<Exclude<Locale, "
   }
 };
 
-export function getLocalizedEventText(id: string, fallbackText: string, locale: Locale): string {
+export function getLocalizedEventText(
+  id: string,
+  fallbackText: string,
+  locale: Locale,
+  inlineTranslations?: EventTranslations
+): string {
   if (locale === "en") return fallbackText;
+  const inline = inlineTranslations?.[locale]?.trim();
+  if (inline) return inline;
   return EVENT_TRANSLATIONS[id]?.[locale] ?? fallbackText;
 }
