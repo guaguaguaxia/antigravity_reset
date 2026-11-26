@@ -196,11 +196,13 @@ describe("X webhook & APIMart AI classification", () => {
       new Request(url.toString(), {
         method: "POST",
         body: JSON.stringify({
-          tweet: {
+          event: "new_tweet",
+          monitored_username: "_mohansolo",
+          data: {
+            tweet_created_at: "2026-11-26T12:20:00.000000Z",
             id: 999000111222333999,
             id_str: "999000111222333991",
             full_text: "Resetting quotas across all models on Antigravity!",
-            created_at: "Thu Nov 26 12:30:00 +0000 2026",
             user: { screen_name: "_mohansolo" }
           }
         })
@@ -214,7 +216,56 @@ describe("X webhook & APIMart AI classification", () => {
     const loaded = await loadDataset(env);
     const payload = normalizeDataset(loaded, "en");
     expect(payload.events[0].id).toBe("999000111222333991");
+    expect(payload.events[0].announced_at).toBe("2026-11-26T12:20:00.000Z");
     expect(payload.events[0].reset_type).toBe("all");
+  });
+
+  it("exposes authenticated GET /api/webhook/x/status with monitor and last delivery summary", async () => {
+    const { kv } = createMockKv();
+    const env = createEnv(kv);
+
+    const unauth = await handleXWebhook(
+      new Request("https://antigravityreset.app/api/webhook/x/status", { method: "GET" }),
+      env,
+      new URL("https://antigravityreset.app/api/webhook/x/status")
+    );
+    expect(unauth.status).toBe(401);
+
+    const postUrl = new URL("https://antigravityreset.app/api/webhook/x?token=test-secret-123");
+    await handleXWebhook(
+      new Request(postUrl.toString(), {
+        method: "POST",
+        body: JSON.stringify({
+          event: "new_tweet",
+          data: {
+            id_str: "999000111222333888",
+            full_text: "Hello from unrelated author",
+            tweet_created_at: "2026-11-26T12:25:00.000000Z",
+            user: { screen_name: "other_user" }
+          }
+        })
+      }),
+      env,
+      postUrl
+    );
+
+    const statusUrl = new URL("https://antigravityreset.app/api/webhook/x/status?token=test-secret-123");
+    const statusRes = await handleXWebhook(
+      new Request(statusUrl.toString(), { method: "GET" }),
+      env,
+      statusUrl
+    );
+    expect(statusRes.status).toBe(200);
+    const body = (await statusRes.json()) as {
+      ok: boolean;
+      total_events: number;
+      last_delivery: { received: number; added: number; skipped: number; results: Array<{ id: string; status: string }> };
+    };
+    expect(body.ok).toBe(true);
+    expect(body.total_events).toBe(7);
+    expect(body.last_delivery.received).toBe(1);
+    expect(body.last_delivery.skipped).toBe(1);
+    expect(body.last_delivery.results[0]).toMatchObject({ id: "999000111222333888", status: "skipped" });
   });
 
   it("rejects non-reset tweets via AI and pre-filters retweets, replies to others, unknown authors, and duplicates", async () => {

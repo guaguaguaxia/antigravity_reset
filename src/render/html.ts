@@ -735,6 +735,7 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
   ${ogAlternates}
   <script type="application/ld+json">${jsonLd}</script>
   ${renderThemeHeadScript()}
+  <script defer src="https://www.pvuv.ai/f.js" data-site="kKrRBmM4" data-api="https://in.pvuv.ai"></script>
 </head>
 <body>
   <div id="app" data-locale="${escapeHtml(locale)}">

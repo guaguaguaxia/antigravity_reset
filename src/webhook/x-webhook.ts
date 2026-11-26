@@ -81,7 +81,7 @@ function normalizeTimestamp(raw: unknown): string {
   return new Date().toISOString();
 }
 
-function extractSingleTweet(rawItem: unknown): IncomingTweet | null {
+function extractSingleTweet(rawItem: unknown, fallbackAuthor = ""): IncomingTweet | null {
   const obj = asRecord(rawItem);
   if (!obj) return null;
 
@@ -108,9 +108,11 @@ function extractSingleTweet(rawItem: unknown): IncomingTweet | null {
     obj.username,
     obj.user_screen_name
   );
-  const author = normalizeHandle(rawAuthor);
+  const author = normalizeHandle(rawAuthor) || normalizeHandle(fallbackAuthor);
 
-  const announcedAt = normalizeTimestamp(obj.createdAt ?? obj.created_at ?? obj.announcedAt ?? obj.announced_at);
+  const announcedAt = normalizeTimestamp(
+    obj.tweet_created_at ?? obj.createdAt ?? obj.created_at ?? obj.announcedAt ?? obj.announced_at
+  );
   const rawUrl = pickFirstString(obj.url, obj.sourceUrl, obj.source_url);
   const sourceUrl = normalizeSourceUrl(rawUrl, author, id);
 
@@ -179,9 +181,10 @@ export function extractIncomingTweets(body: unknown): IncomingTweet[] {
     candidates.push(obj);
   }
 
+  const topAuthor = pickFirstString(obj.monitored_username, obj.monitoredUsername, obj.username);
   const tweets: IncomingTweet[] = [];
   for (const item of candidates) {
-    const parsed = extractSingleTweet(item);
+    const parsed = extractSingleTweet(item, topAuthor);
     if (parsed) tweets.push(parsed);
   }
   return tweets;
@@ -189,7 +192,7 @@ export function extractIncomingTweets(body: unknown): IncomingTweet[] {
 
 function extractWebhookToken(request: Request, url: URL): string {
   const pathPrefix = "/api/webhook/x/";
-  if (url.pathname.startsWith(pathPrefix)) {
+  if (url.pathname.startsWith(pathPrefix) && url.pathname !== "/api/webhook/x/status") {
     const rawSegment = url.pathname.slice(pathPrefix.length).split("/")[0] ?? "";
     if (rawSegment) {
       try {
@@ -238,7 +241,9 @@ export async function handleXWebhook(
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
-  if (request.method !== "POST") {
+
+  const isStatusRoute = url.pathname === "/api/webhook/x/status";
+  if ((isStatusRoute && request.method !== "GET") || (!isStatusRoute && request.method !== "POST")) {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
@@ -250,6 +255,29 @@ export async function handleXWebhook(
   const providedSecret = extractWebhookToken(request, url);
   if (!providedSecret || !(await constantTimeEqual(providedSecret, expectedSecret))) {
     return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
+  if (isStatusRoute) {
+    const dataset = await loadDataset(env);
+    let lastDelivery: unknown = null;
+    if (env.ANTIGRAVITY_KV) {
+      try {
+        lastDelivery = await env.ANTIGRAVITY_KV.get(LAST_DELIVERY_KV_KEY, "json");
+      } catch {
+        lastDelivery = null;
+      }
+    }
+    return jsonResponse(
+      {
+        ok: true,
+        monitor: dataset.monitor,
+        total_events: dataset.events.length,
+        latest_event_id: dataset.events[0]?.id ?? null,
+        last_delivery: lastDelivery
+      },
+      200,
+      { "Cache-Control": "no-store" }
+    );
   }
 
   let body: unknown;
@@ -433,7 +461,15 @@ export async function handleXWebhook(
         received: incomingTweets.length,
         added: addedEvents.length,
         skipped,
-        ids: incomingTweets.map((t) => t.id)
+        results: results.map((r) => ({
+          id: r.id,
+          author: r.author,
+          status: r.status,
+          reason: r.reason,
+          is_reset: r.classification?.is_reset ?? null,
+          confidence: r.classification?.confidence ?? null,
+          models: r.classification?.models ?? []
+        }))
       }),
       { expirationTtl: LAST_DELIVERY_TTL_SECONDS }
     );

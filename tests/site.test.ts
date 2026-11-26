@@ -54,6 +54,9 @@ describe("SSR multi-language rendering & SEO", () => {
       expect(html).not.toContain("fonts.googleapis.com");
       expect(html).toContain('<script defer src="/site-shell.js?v=2"></script>');
       expect(html).toContain('<script defer src="/app.js?v=3"></script>');
+      expect(html).toContain(
+        '<script defer src="https://www.pvuv.ai/f.js" data-site="kKrRBmM4" data-api="https://in.pvuv.ai"></script>'
+      );
       const footerMatch = html.match(/<nav class="site-footer-langs"[\s\S]*?<\/nav>/);
       expect(footerMatch).toBeTruthy();
       expect(footerMatch![0]).toContain('<a href="/" lang="en" hreflang="en"');
@@ -90,6 +93,9 @@ describe("SSR multi-language rendering & SEO", () => {
     expect(docsHtml).toContain("<h1>Antigravity Reset Public API</h1>");
     expect(docsHtml).toContain('<link rel="canonical" href="https://antigravityreset.app/api/docs" />');
     expect(docsHtml).toContain('<meta name="description"');
+    expect(docsHtml).toContain(
+      '<script defer src="https://www.pvuv.ai/f.js" data-site="kKrRBmM4" data-api="https://in.pvuv.ai"></script>'
+    );
   });
 
   it("renders valid sitemap.xml with all 5 locales, /api/docs, hreflang, and dataset lastmod", () => {

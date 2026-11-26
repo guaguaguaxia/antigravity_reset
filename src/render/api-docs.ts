@@ -36,6 +36,7 @@ export function renderApiDocsPage(locale: Locale = "en"): string {
   <link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />
   <link rel="stylesheet" href="/styles.css?v=3" />
   ${renderThemeHeadScript()}
+  <script defer src="https://www.pvuv.ai/f.js" data-site="kKrRBmM4" data-api="https://in.pvuv.ai"></script>
 </head>
 <body>
   <div class="page">
