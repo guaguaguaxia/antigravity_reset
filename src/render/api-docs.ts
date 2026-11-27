@@ -88,6 +88,11 @@ Content-Type: application/json
     }
   }
 }</pre>
+
+        <h2 id="badges">6. Attribution &amp; Embed Badges</h2>
+        <p>Using our free API, RSS feed, or MCP server in your tracker, blog, or README? Copy either snippet below to link back:</p>
+        <pre class="docs-endpoint">&lt;a href="https://antigravityreset.app/"&gt;Data from Antigravity Reset&lt;/a&gt;</pre>
+        <pre class="docs-endpoint">[![Antigravity Reset Tracker](https://img.shields.io/badge/Antigravity_Reset-Live_Tracker-ff6b35?style=flat-square)](https://antigravityreset.app/)</pre>
       </section>
     </main>
     ${renderFooter(locale)}

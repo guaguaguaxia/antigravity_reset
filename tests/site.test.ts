@@ -93,6 +93,8 @@ describe("SSR multi-language rendering & SEO", () => {
     expect(docsHtml).toContain("<h1>Antigravity Reset Public API</h1>");
     expect(docsHtml).toContain('<link rel="canonical" href="https://antigravityreset.app/api/docs" />');
     expect(docsHtml).toContain('<meta name="description"');
+    expect(docsHtml).toContain('id="mcp"');
+    expect(docsHtml).toContain('id="badges"');
     expect(docsHtml).toContain(
       '<script defer src="https://www.pvuv.ai/f.js" data-site="kKrRBmM4" data-api="https://in.pvuv.ai"></script>'
     );
