@@ -1,6 +1,6 @@
 ---
 name: antigravity-reset
-description: Check the latest Google Antigravity quota reset status, announcement history, average reset intervals, and localized summaries via the zero-auth Antigravity Reset MCP server, JSON API, RSS feed, or Markdown endpoints.
+description: Check the latest Google Antigravity quota reset status, announcement history, average reset intervals, and localized summaries via the zero-auth Antigravity Reset MCP server, OpenAPI, JSON API, RSS feed, or Markdown endpoints.
 ---
 
 # Antigravity Reset Skill
@@ -10,6 +10,9 @@ Use this skill when a user asks whether **Google Antigravity** recently reset us
 - **Homepage**: https://antigravityreset.app
 - **Official MCP Registry**: `app.antigravityreset/antigravity-reset`
 - **API Docs**: https://antigravityreset.app/api/docs
+- **OpenAPI 3.1**: https://antigravityreset.app/openapi.json
+- **Hosted Skill**: https://antigravityreset.app/SKILL.md
+- **llms.txt**: https://antigravityreset.app/llms.txt
 
 ## Option 1: Remote Streamable HTTP MCP (No Auth Required)
 
@@ -35,5 +38,9 @@ Available read-only MCP tools:
 ## Option 2: Direct HTTP Endpoints (No API Key Required)
 
 - **Latest JSON + stats**: `GET https://antigravityreset.app/api/resets?locale=en` (replace `locale` with `zh-CN`, `zh-TW`, `ja`, or `ko`)
+- **Single reset event + interval**: `GET https://antigravityreset.app/api/resets/{id}?locale=en`
+- **Permanent event page**: `https://antigravityreset.app/resets/{id}`
+- **OpenAPI 3.1 spec**: `GET https://antigravityreset.app/openapi.json`
 - **Markdown summary**: `GET https://antigravityreset.app/en.md` or `GET https://antigravityreset.app/zh-CN.md`
 - **RSS 2.0 feed**: `GET https://antigravityreset.app/feed.xml`
+- **Live SVG status badge**: `GET https://antigravityreset.app/badge.svg`

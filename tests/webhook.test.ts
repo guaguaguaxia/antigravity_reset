@@ -367,4 +367,109 @@ describe("X webhook & APIMart AI classification", () => {
     expect(directAi.is_reset).toBe(true);
     expect(directAi.translations["zh-CN"]).toBe("测试");
   });
+
+  it("broadcasts newly accepted resets to Telegram with canonical site link and tolerates Telegram errors", async () => {
+    const { kv, store } = createMockKv();
+    const env: WorkerEnv = {
+      ...createEnv(kv),
+      TELEGRAM_BOT_TOKEN: "12345:bot-token",
+      TELEGRAM_CHAT_ID: "@antigravity_resets"
+    };
+
+    const fetchMock = vi.fn<typeof fetch>(async (input) => {
+      const target = String(input);
+      if (target.includes("api.telegram.org")) {
+        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  is_reset: true,
+                  confidence: 0.99,
+                  reason: "Official reset",
+                  models: ["Gemini"],
+                  translations: { "zh-CN": "重置公告" }
+                })
+              }
+            }
+          ]
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    const url = new URL("https://antigravityreset.app/api/webhook/x?token=test-secret-123");
+    const res = await handleXWebhook(
+      new Request(url.toString(), {
+        method: "POST",
+        body: JSON.stringify({
+          id: "999000111222333600",
+          author: "_mohansolo",
+          text: "Resetting Gemini quotas now!",
+          createdAt: "2026-11-27T01:00:00.000Z"
+        })
+      }),
+      env,
+      url,
+      { fetchFn: fetchMock }
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { added: number; telegram_sent: number };
+    expect(body.added).toBe(1);
+    expect(body.telegram_sent).toBe(1);
+    const tgCall = fetchMock.mock.calls.find((c) => String(c[0]).includes("api.telegram.org"));
+    expect(tgCall).toBeTruthy();
+    const tgPayload = JSON.parse(String((tgCall![1] as RequestInit).body)) as { chat_id: string; text: string };
+    expect(tgPayload.chat_id).toBe("@antigravity_resets");
+    expect(tgPayload.text).toContain("https://antigravityreset.app/resets/999000111222333600");
+
+    // Telegram failure should not break KV storage or webhook 200 response
+    const failingTgFetch = vi.fn<typeof fetch>(async (input) => {
+      if (String(input).includes("api.telegram.org")) {
+        return new Response("Bad Gateway", { status: 502 });
+      }
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  is_reset: true,
+                  confidence: 0.96,
+                  reason: "Official reset",
+                  models: [],
+                  translations: {}
+                })
+              }
+            }
+          ]
+        }),
+        { status: 200 }
+      );
+    });
+
+    const res2 = await handleXWebhook(
+      new Request(url.toString(), {
+        method: "POST",
+        body: JSON.stringify({
+          id: "999000111222333601",
+          author: "_mohansolo",
+          text: "Resetting all model quotas!"
+        })
+      }),
+      env,
+      url,
+      { fetchFn: failingTgFetch }
+    );
+    expect(res2.status).toBe(200);
+    const body2 = (await res2.json()) as { added: number; telegram_sent: number };
+    expect(body2.added).toBe(1);
+    expect(body2.telegram_sent).toBe(0);
+    const stored = JSON.parse(store.get(DATASET_KV_KEY)!) as RawDataset;
+    expect(stored.events.some((e) => e.id === "999000111222333601")).toBe(true);
+  });
 });

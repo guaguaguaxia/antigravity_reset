@@ -1,6 +1,8 @@
 import seedData from "./resets.json";
 import { getLocalizedEventText, type EventTranslations } from "./translations";
-import type { Locale } from "../i18n";
+import { resetDetailPath, type Locale } from "../i18n";
+
+const BASE_URL = "https://antigravityreset.app";
 
 export interface RawResetEvent {
   id: string;
@@ -32,6 +34,7 @@ export interface NormalizedResetEvent {
   id: string;
   announced_at: string;
   source_url: string;
+  permalink: string;
   text: string;
   display_text: string;
   product: string;
@@ -189,6 +192,7 @@ export function normalizeDataset(dataset: RawDataset, locale: Locale): ResetPayl
     id: ev.id,
     announced_at: new Date(Date.parse(ev.announcedAt)).toISOString(),
     source_url: ev.sourceUrl,
+    permalink: `${BASE_URL}${resetDetailPath(ev.id, locale)}`,
     text: ev.text,
     display_text: getLocalizedEventText(ev.id, ev.text, locale, ev.translations),
     product: ev.product,

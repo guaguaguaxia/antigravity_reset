@@ -312,9 +312,13 @@ async function executeToolCall(
         monitor: payload.monitor,
         api_endpoints: {
           json: `${BASE_URL}/api/resets`,
+          openapi: `${BASE_URL}/openapi.json`,
           rss: `${BASE_URL}/feed.xml`,
           markdown: `${BASE_URL}/en.md`,
-          docs: `${BASE_URL}/api/docs`
+          docs: `${BASE_URL}/api/docs`,
+          skill: `${BASE_URL}/SKILL.md`,
+          llms: `${BASE_URL}/llms.txt`,
+          badge: `${BASE_URL}/badge.svg`
         }
       }
     };

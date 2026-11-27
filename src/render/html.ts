@@ -2,10 +2,12 @@ import {
   LOCALES,
   LOCALE_NAMES,
   OG_LOCALES,
+  apiDocsPath,
   createTranslator,
   getClientI18nBundle,
   getFaqItems,
   localePath,
+  resetDetailPath,
   type Locale
 } from "../i18n";
 import type { NormalizedResetEvent, ResetPayload } from "../data/repository";
@@ -96,10 +98,15 @@ function renderDigitSpans(value: number | null, locale: Locale): string {
   return Array.from(text, (ch) => `<span class="t-digit">${escapeHtml(ch)}</span>`).join("");
 }
 
-function renderLanguageLinks(current: Locale, persistPreference: boolean, autofocusCurrent = false): string {
+function renderLanguageLinks(
+  current: Locale,
+  persistPreference: boolean,
+  autofocusCurrent = false,
+  pathBuilder: (loc: Locale) => string = localePath
+): string {
   return LOCALES.map((loc) => {
     const isCurrent = loc === current;
-    const base = localePath(loc);
+    const base = pathBuilder(loc);
     const href = persistPreference ? `${base}?lang=${loc}` : base;
     const rel = href.includes("?") ? ' rel="nofollow"' : "";
     const aria = isCurrent ? ' aria-current="page"' : "";
@@ -240,8 +247,8 @@ function renderContributionGraph(events: NormalizedResetEvent[], locale: Locale,
             wi + 1
           };grid-row:${di + 2}" aria-label="${aria}"`;
 
-          return first?.source_url
-            ? `<a ${attrs} href="${escapeHtml(first.source_url)}" target="_blank" rel="noopener noreferrer"></a>`
+          return first
+            ? `<a ${attrs} href="${escapeHtml(resetDetailPath(first.id, locale))}"></a>`
             : `<button type="button" ${attrs}></button>`;
         })
         .join("")
@@ -301,9 +308,14 @@ function renderEventItems(events: NormalizedResetEvent[], locale: Locale, nowMs:
           <span class="log-model-tags">${tagsHtml}</span>
         </div>
         <p class="log-item-text" data-role="tweet-display-text">${escapeHtml(ev.display_text)}</p>
-        <a class="log-item-link" href="${escapeHtml(ev.source_url)}" target="_blank" rel="noopener noreferrer">${t(
-          "View on X &rarr;"
-        )}</a>
+        <div class="log-item-actions">
+          <a class="log-item-link log-item-link--detail" href="${escapeHtml(
+            resetDetailPath(ev.id, locale)
+          )}">${escapeHtml(t("Details"))} &rarr;</a>
+          <a class="log-item-link" href="${escapeHtml(ev.source_url)}" target="_blank" rel="noopener noreferrer">${t(
+            "View on X &rarr;"
+          )}</a>
+        </div>
       </div>
     </li>`;
     })
@@ -460,7 +472,11 @@ export function renderThemeHeadScript(): string {
 })();</script>`;
 }
 
-export function renderMasthead(locale: Locale, isHome: boolean): string {
+export function renderMasthead(
+  locale: Locale,
+  isHome: boolean,
+  langPathBuilder?: (loc: Locale) => string
+): string {
   const t = createTranslator(locale);
   const titleEl = isHome
     ? `<h1 class="masthead-title">Antigravity Reset</h1>`
@@ -502,7 +518,7 @@ export function renderMasthead(locale: Locale, isHome: boolean): string {
         </svg>
       </button>
       <nav class="language-menu" id="language-menu" popover="auto" aria-label="${escapeHtml(t("Language"))}">
-        ${renderLanguageLinks(locale, true, true)}
+        ${renderLanguageLinks(locale, !langPathBuilder, true, langPathBuilder)}
       </nav>
       <a class="x-link" data-role="x-link" href="https://x.com/_mohansolo" target="_blank" rel="noopener noreferrer" title="${escapeHtml(
         t("Follow @_mohansolo on X")
@@ -528,19 +544,23 @@ export function renderMasthead(locale: Locale, isHome: boolean): string {
   </header>`;
 }
 
-export function renderFooter(locale: Locale, monitorLastSuccessAt?: string): string {
+export function renderFooter(
+  locale: Locale,
+  monitorLastSuccessAt?: string,
+  langPathBuilder?: (loc: Locale) => string
+): string {
   const t = createTranslator(locale);
   const mdPath = locale === "en" ? "/en.md" : `${localePath(locale)}.md`;
   return `  <footer class="site-footer">
     <nav class="site-footer-langs" aria-label="${escapeHtml(t("Language"))}">
-      ${renderLanguageLinks(locale, false, false)}
+      ${renderLanguageLinks(locale, false, false, langPathBuilder)}
     </nav>
     <p>${escapeHtml(
       t("Data from @_mohansolo's posts on X, tracked for Antigravity Reset. Not affiliated with Google.")
     )}</p>
     <p>${escapeHtml(t("Mohan, if you're reading this: no pressure."))}</p>
     <p>${t("Want the data? There's free public {api}, {rss}, and {md}.", {
-      api: `<a href="/api/docs">API</a>`,
+      api: `<a href="${escapeHtml(apiDocsPath(locale))}">API</a>`,
       rss: `<a href="/feed.xml">RSS</a>`,
       md: `<a href="${mdPath}">Markdown</a>`
     })}</p>
@@ -727,7 +747,7 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
   <link rel="icon" href="/mohan-avatar.png?v=1" type="image/png" sizes="256x256" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="/styles.css?v=3" />
+  <link rel="stylesheet" href="/styles.css?v=4" />
   ${hreflangLinks}
   <link rel="alternate" type="text/markdown" title="Markdown" href="${escapeHtml(mdUrl)}" />
   <link rel="alternate" type="application/rss+xml" title="Antigravity Reset RSS" href="${BASE_URL}/feed.xml" />

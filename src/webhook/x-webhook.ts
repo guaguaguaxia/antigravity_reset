@@ -11,6 +11,7 @@ import {
   type RawResetEvent
 } from "../data/repository";
 import { classifyResetTweet, type AiClassificationResult } from "./ai-classifier";
+import { broadcastResetToTelegram } from "./telegram";
 
 const DEFAULT_ALLOWED_AUTHORS = "_mohansolo";
 const MIN_RESET_CONFIDENCE = 0.7;
@@ -475,12 +476,21 @@ export async function handleXWebhook(
     );
   }
 
+  let telegramSent = 0;
+  if (!dryRun && addedEvents.length > 0) {
+    for (const ev of addedEvents) {
+      const outcome = await broadcastResetToTelegram(ev, env, deps.fetchFn);
+      if (outcome.sent) telegramSent += 1;
+    }
+  }
+
   return jsonResponse({
     ok: true,
     dry_run: dryRun,
     received: incomingTweets.length,
     added: addedEvents.length,
     skipped,
+    telegram_sent: telegramSent,
     total_events: mergedEvents.length,
     results
   });

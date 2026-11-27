@@ -31,6 +31,7 @@ export function renderMarkdown(payload: ResetPayload, locale: Locale): string {
     lines.push("");
     lines.push(ev.display_text);
     lines.push("");
+    lines.push(`Details: ${ev.permalink}`);
     lines.push(`Source: ${ev.source_url}`);
     lines.push("");
   }

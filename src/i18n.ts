@@ -21,6 +21,15 @@ export function localePath(locale: Locale): string {
   return locale === "en" ? "/" : `/${locale}`;
 }
 
+export function resetDetailPath(id: string, locale: Locale = "en"): string {
+  const encodedId = encodeURIComponent(id);
+  return locale === "en" ? `/resets/${encodedId}` : `/${locale}/resets/${encodedId}`;
+}
+
+export function apiDocsPath(locale: Locale = "en"): string {
+  return locale === "en" ? "/api/docs" : `/${locale}/api/docs`;
+}
+
 export function normalizeLocale(input: string | null | undefined): Locale | null {
   if (!input) return null;
   const trimmed = input.trim();
@@ -655,6 +664,108 @@ const MESSAGES = {
     "zh-TW": "最近同步：{time}",
     ja: "最終同期：{time}",
     ko: "최근 동기화: {time}"
+  },
+  Details: {
+    "zh-CN": "详情",
+    "zh-TW": "詳情",
+    ja: "詳細",
+    ko: "상세 보기"
+  },
+  "Back to all resets": {
+    "zh-CN": "返回全部重置记录",
+    "zh-TW": "返回全部重置紀錄",
+    ja: "すべてのリセット履歴に戻る",
+    ko: "전체 리셋 기록으로 돌아가기"
+  },
+  "Official announcement": {
+    "zh-CN": "官方重置公告",
+    "zh-TW": "官方重置公告",
+    ja: "公式アナウンス",
+    ko: "공식 발표"
+  },
+  "Original English announcement": {
+    "zh-CN": "英文原文公告",
+    "zh-TW": "英文原文公告",
+    ja: "英語の原文アナウンス",
+    ko: "영어 원문 공지"
+  },
+  "Reset details": {
+    "zh-CN": "重置详情",
+    "zh-TW": "重置詳情",
+    ja: "リセット詳細",
+    ko: "리셋 상세 정보"
+  },
+  "Affected models": {
+    "zh-CN": "涉及模型",
+    "zh-TW": "涉及模型",
+    ja: "対象モデル",
+    ko: "대상 모델"
+  },
+  "Announced (UTC)": {
+    "zh-CN": "公布时间（UTC）",
+    "zh-TW": "公布時間（UTC）",
+    ja: "発表時刻（UTC）",
+    ko: "발표 시각 (UTC)"
+  },
+  "Interval since previous reset": {
+    "zh-CN": "距离上次重置间隔",
+    "zh-TW": "距離上次重置間隔",
+    ja: "前回リセットからの間隔",
+    ko: "이전 리셋 이후 간격"
+  },
+  "First tracked reset": {
+    "zh-CN": "最早收录的重置记录",
+    "zh-TW": "最早收錄的重置紀錄",
+    ja: "最初に記録されたリセット",
+    ko: "최초 기록된 리셋"
+  },
+  "Source post": {
+    "zh-CN": "原始来源",
+    "zh-TW": "原始來源",
+    ja: "元の投稿",
+    ko: "원본 게시물"
+  },
+  "Previous reset": {
+    "zh-CN": "上一次重置",
+    "zh-TW": "上一次重置",
+    ja: "前回のリセット",
+    ko: "이전 리셋"
+  },
+  "Next reset": {
+    "zh-CN": "下一次重置",
+    "zh-TW": "下一次重置",
+    ja: "次のリセット",
+    ko: "다음 리셋"
+  },
+  "API & Embed": {
+    "zh-CN": "API 与徽章嵌入",
+    "zh-TW": "API 與徽章嵌入",
+    ja: "API・バッジ埋め込み",
+    ko: "API 및 배지 임베드"
+  },
+  "Antigravity Reset — {scope} ({date})": {
+    "zh-CN": "Antigravity Reset — {scope}（{date}）",
+    "zh-TW": "Antigravity Reset — {scope}（{date}）",
+    ja: "Antigravity Reset — {scope}（{date}）",
+    ko: "Antigravity Reset — {scope} ({date})"
+  },
+  "Verified Google Antigravity {scope} announced on {date} by @_mohansolo. View full announcement, interval stats, and open API data.": {
+    "zh-CN": "已核实 @_mohansolo 于 {date} 发布的 Google Antigravity {scope}公告。查看完整原文、间隔统计与公开 API 数据。",
+    "zh-TW": "已核實 @_mohansolo 於 {date} 發布的 Google Antigravity {scope}公告。查看完整原文、間隔統計與公開 API 資料。",
+    ja: "@_mohansolo が {date} に発表した Google Antigravity の{scope}公式記録。全文、リセット間隔統計、公開 API データを確認できます。",
+    ko: "@_mohansolo가 {date}에 발표한 Google Antigravity {scope} 공식 기록입니다. 전체 공지 내용, 리셋 간격 통계 및 공개 API 데이터를 확인하세요."
+  },
+  Home: {
+    "zh-CN": "首页",
+    "zh-TW": "首頁",
+    ja: "ホーム",
+    ko: "홈"
+  },
+  "Reset #{id}": {
+    "zh-CN": "重置记录 #{id}",
+    "zh-TW": "重置紀錄 #{id}",
+    ja: "リセット #{id}",
+    ko: "리셋 #{id}"
   }
 } as const satisfies Record<string, Record<Exclude<Locale, "en">, string>>;
 

@@ -62,39 +62,45 @@
 
 ## 免费公开数据接口
 
-所有读取接口完全免费、已开启 CORS，无需 API Key。完整接口文档见 [antigravityreset.app/api/docs](https://antigravityreset.app/api/docs)。
+所有读取接口完全免费、已开启 CORS，无需 API Key。完整接口文档见 [antigravityreset.app/zh-CN/api/docs](https://antigravityreset.app/zh-CN/api/docs)（支持 5 种语言文档）。
 
 | 接口路径 | 格式 | 说明 |
 | :--- | :--- | :--- |
-| `GET /api/resets?locale=zh-CN` | JSON | 指定语言的重置历史记录、统计指标与监控状态 |
-| `GET /feed.xml` | RSS 2.0 | 标准 RSS 订阅源 |
+| `GET /api/resets?locale=zh-CN` | JSON | 指定语言的重置历史记录、永久链接、统计指标与监控状态 |
+| `GET /api/resets/{id}?locale=zh-CN` | JSON | 单条重置事件详情、距上次重置间隔及前后事件 ID |
+| `GET /openapi.json` · `/openapi/v1/openapi.json` | OpenAPI 3.1 | 标准机器可读 OpenAPI 规范文档 |
+| `GET /resets/{id}` · `/{locale}/resets/{id}` | HTML | 每条重置公告的永久独立详情页（支持 5 语） |
+| `GET /feed.xml`（支持 `?locale=`） | RSS 2.0 | 指向站内详情页的标准 RSS 订阅源 |
 | `GET /zh-CN.md` · `/zh-TW.md` · `/en.md` · `/ja.md` · `/ko.md` | Markdown | 适合 AI / 脚本直接抓取的本地化摘要 |
-| `GET /api/docs` | HTML | 公开 API、MCP 与署名回链文档 |
+| `GET /SKILL.md` | Markdown | 在线托管的便携 Agent Skill |
+| `GET /llms.txt` | Text | 面向 AI 爬虫与索引器的 `llmstxt.org` 索引 |
+| `GET /badge.svg`（支持 `?label=`） | SVG | 实时动态 SVG 状态徽章，可直接嵌入 README 与博客 |
+| `GET /api/docs` · `/zh-CN/api/docs` | HTML | 多语言公开 API、MCP 与署名回链文档 |
 
-### 署名引用与徽章
+### 署名引用与实时 SVG 徽章
 
-如果你在自己的工具站、看板或文章中引用了本站数据，欢迎加上反向链接指向 [`antigravityreset.app`](https://antigravityreset.app/)：
+如果你在自己的工具站、看板、博客或 README 中引用了本站数据，欢迎加上反向链接指向 [`antigravityreset.app`](https://antigravityreset.app/) 或直接嵌入实时状态徽章：
 
 ```html
 Data from <a href="https://antigravityreset.app/">Antigravity Reset</a>
 ```
 
 ```markdown
-[![Antigravity Reset Tracker](https://img.shields.io/badge/Antigravity_Reset-Live_Tracker-ff6b35?style=flat-square)](https://antigravityreset.app/)
+[![Antigravity Reset](https://antigravityreset.app/badge.svg)](https://antigravityreset.app/)
 ```
 
 ---
 
 ## Agent Skill
 
-仓库内置了 [`skills/antigravity-reset/SKILL.md`](./skills/antigravity-reset/SKILL.md)，方便各类 AI Coding Agent 在规划重度任务前直接查询 Antigravity 最近是否有额度重置。
+仓库内置了 [`skills/antigravity-reset/SKILL.md`](./skills/antigravity-reset/SKILL.md)（同时在线托管于 [`https://antigravityreset.app/SKILL.md`](https://antigravityreset.app/SKILL.md)），方便各类 AI Coding Agent 在规划重度任务前直接查询 Antigravity 最近是否有额度重置。
 
 ---
 
 ## 技术架构与本地开发
 
 - **部署架构**：Cloudflare Workers + Workers KV (`ANTIGRAVITY_KV`) + 静态资源托管
-- **实时同步与多语言 AI 判定**：`POST /api/webhook/x` 接收来自 X 的 Webhook 推送（兼容 TwitterAPI.io / SocialData.tools / 通用 JSON），调用 AI 自动判定是否为有效重置公告并生成繁/简/日/韩 4 语译文实时写入 KV
+- **实时同步、多语言 AI 判定与频道播报**：`POST /api/webhook/x` 接收来自 X 的 Webhook 推送（兼容 TwitterAPI.io / SocialData.tools / 通用 JSON），调用 AI 自动判定是否为有效重置公告并生成繁/简/日/韩 4 语译文实时写入 KV；若配置了 `TELEGRAM_BOT_TOKEN` 与 `TELEGRAM_CHAT_ID` 密钥，还会在新重置入库时自动向 Telegram 频道播报
 - **自动发布**：GitHub Actions（`.github/workflows/deploy.yml`）在推送至 `main` 后自动执行类型检查、Vitest 单元测试并部署至 Cloudflare Workers
 
 ```bash

@@ -16,6 +16,8 @@ export interface WorkerEnv {
   APIMART_BASE_URL?: string;
   APIMART_MODEL?: string;
   ALLOWED_X_AUTHORS?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
 }
 
 export const CORS_HEADERS = {
@@ -79,6 +81,48 @@ export async function handleApiRequest(request: Request, env: WorkerEnv, url: UR
     return jsonResponse(payload, 200, {
       "Cache-Control": "public, max-age=60"
     });
+  }
+
+  const singleResetMatch = /^\/api\/resets\/([^/]+)$/.exec(path);
+  if (singleResetMatch && request.method === "GET") {
+    let id = "";
+    try {
+      id = decodeURIComponent(singleResetMatch[1]).trim();
+    } catch {
+      return jsonResponse({ error: "Invalid event ID encoding" }, 400);
+    }
+    if (!id) {
+      return jsonResponse({ error: "Reset event not found" }, 404);
+    }
+    const locale = normalizeLocale(url.searchParams.get("locale")) ?? "en";
+    const dataset = await loadDataset(env);
+    const payload = normalizeDataset(dataset, locale);
+    const idx = payload.events.findIndex((ev) => ev.id === id);
+    if (idx === -1) {
+      return jsonResponse({ error: "Reset event not found" }, 404);
+    }
+    const event = payload.events[idx];
+    const previousEvent = payload.events[idx + 1] ?? null;
+    const nextEvent = idx > 0 ? payload.events[idx - 1] ?? null : null;
+    let intervalSincePreviousDays: number | null = null;
+    if (previousEvent) {
+      const diffMs = Date.parse(event.announced_at) - Date.parse(previousEvent.announced_at);
+      if (Number.isFinite(diffMs) && diffMs >= 0) {
+        intervalSincePreviousDays = Number((diffMs / 86_400_000).toFixed(1));
+      }
+    }
+    return jsonResponse(
+      {
+        event,
+        interval_since_previous_days: intervalSincePreviousDays,
+        previous_id: previousEvent?.id ?? null,
+        next_id: nextEvent?.id ?? null,
+        stats: payload.stats,
+        updated_at: payload.updated_at
+      },
+      200,
+      { "Cache-Control": "public, max-age=300" }
+    );
   }
 
   if (path === "/api/reset-requests") {

@@ -152,11 +152,16 @@ describe("Streamable HTTP MCP server & Official Registry manifest", () => {
         structuredContent: {
           stats: { total: number; avg_interval_days: number };
           breakdown: { by_reset_type: { regular: number; all: number } };
+          api_endpoints: { openapi: string; skill: string; llms: string; badge: string };
         };
       };
     };
     expect(statsJson.result.structuredContent.stats.total).toBe(7);
     expect(statsJson.result.structuredContent.breakdown.by_reset_type).toEqual({ regular: 4, all: 3 });
+    expect(statsJson.result.structuredContent.api_endpoints.openapi).toBe("https://antigravityreset.app/openapi.json");
+    expect(statsJson.result.structuredContent.api_endpoints.skill).toBe("https://antigravityreset.app/SKILL.md");
+    expect(statsJson.result.structuredContent.api_endpoints.llms).toBe("https://antigravityreset.app/llms.txt");
+    expect(statsJson.result.structuredContent.api_endpoints.badge).toBe("https://antigravityreset.app/badge.svg");
   });
 
   it("lists and reads MCP resources", async () => {
