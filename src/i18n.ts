@@ -37,6 +37,48 @@ export function localeFromPath(pathname: string): Locale {
   return "en";
 }
 
+/** Match an HTTP Accept-Language header (respecting q weights) against supported site locales. */
+export function matchAcceptLanguage(header: string | null | undefined): Locale | null {
+  if (!header || !header.trim()) return null;
+
+  const candidates = header
+    .split(",")
+    .map((part, index) => {
+      const segments = part
+        .split(";")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const tag = (segments[0] ?? "").toLowerCase();
+      let q = 1;
+      for (const param of segments.slice(1)) {
+        const match = /^q\s*=\s*([0-9]+(?:\.[0-9]+)?)$/i.exec(param);
+        if (match) {
+          q = Number.parseFloat(match[1]);
+        }
+      }
+      return { tag, q, index };
+    })
+    .filter((item) => item.tag && Number.isFinite(item.q) && item.q > 0)
+    .sort((a, b) => b.q - a.q || a.index - b.index);
+
+  for (const { tag } of candidates) {
+    if (tag === "en" || tag.startsWith("en-")) return "en";
+    if (
+      tag === "zh-tw" ||
+      tag === "zh-hk" ||
+      tag === "zh-mo" ||
+      /(?:^|-)hant(?:$|-)/.test(tag)
+    ) {
+      return "zh-TW";
+    }
+    if (tag === "zh" || tag.startsWith("zh-")) return "zh-CN";
+    if (tag === "ja" || tag.startsWith("ja-")) return "ja";
+    if (tag === "ko" || tag.startsWith("ko-")) return "ko";
+  }
+
+  return null;
+}
+
 const MESSAGES = {
   "Antigravity Reset — Live Quota Reset Tracker & History": {
     "zh-CN": "Antigravity Reset — 实时额度重置追踪与历史记录",

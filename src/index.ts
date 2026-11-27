@@ -1,5 +1,5 @@
 import { loadDataset, normalizeDataset } from "./data/repository";
-import { LOCALES, localeFromPath, localePath, normalizeLocale, type Locale } from "./i18n";
+import { LOCALES, localeFromPath, localePath, matchAcceptLanguage, normalizeLocale, type Locale } from "./i18n";
 import { getReactionCount, handleApiRequest, type WorkerEnv } from "./api/handlers";
 import { handleMcpRequest } from "./mcp/server";
 import { renderApiDocsPage } from "./render/api-docs";
@@ -10,6 +10,8 @@ import { renderMarkdown } from "./render/markdown";
 const LANG_COOKIE = "antigravity-reset-language";
 const BASE_URL = "https://antigravityreset.app";
 const MCP_REGISTRY_AUTH_RECORD = "v=MCPv1; k=ed25519; p=pZGLQ3Lw6ug0u3JGSo12efJmNi3bWnoJt7AbNSNspbQ=";
+const CRAWLER_UA_RE =
+  /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|twitterbot|linkedinbot|discordbot|slackbot|telegrambot|whatsapp|applebot|duckduckbot|yandex|baiduspider|bytespider|gptbot|claudebot|perplexitybot|google-inspectiontool|lighthouse|pagespeed/i;
 
 function parseLangCookie(cookieHeader: string | null): Locale | null {
   if (!cookieHeader) return null;
@@ -20,6 +22,23 @@ function parseLangCookie(cookieHeader: string | null): Locale | null {
     }
   }
   return null;
+}
+
+function isLikelyCrawler(userAgent: string | null): boolean {
+  return Boolean(userAgent && CRAWLER_UA_RE.test(userAgent));
+}
+
+function hasLocalizedSameOriginReferer(request: Request, origin: string): boolean {
+  const referer = request.headers.get("Referer");
+  if (!referer) return false;
+  try {
+    const refUrl = new URL(referer);
+    if (refUrl.origin !== origin) return false;
+    const cleanRefPath = refUrl.pathname.replace(/\/+$/, "") || "/";
+    return LOCALES.some((loc) => loc !== "en" && localePath(loc) === cleanRefPath);
+  } catch {
+    return false;
+  }
 }
 
 export function renderSitemap(lastModifiedIso: string | null = null): string {
@@ -97,7 +116,8 @@ export default {
       const target = new URL(localePath(queryLang), url.origin);
       const headers = new Headers({
         Location: target.toString(),
-        "Set-Cookie": `${LANG_COOKIE}=${queryLang}; Max-Age=31536000; Path=/; HttpOnly; Secure; SameSite=Lax`
+        "Set-Cookie": `${LANG_COOKIE}=${queryLang}; Max-Age=31536000; Path=/; Secure; SameSite=Lax`,
+        "Cache-Control": "private, no-store"
       });
       return new Response(null, { status: 302, headers });
     }
@@ -162,6 +182,33 @@ export default {
       LOCALES.some((loc) => loc !== "en" && localePath(loc) === normalizedPath);
 
     if (isLocalizedRoute && (request.method === "GET" || request.method === "HEAD")) {
+      // Auto-detect visitor language on root path "/" (cookie preference > Accept-Language), skipping crawlers.
+      if (normalizedPath === "/" && !isLikelyCrawler(request.headers.get("User-Agent"))) {
+        const cookieLang = parseLangCookie(request.headers.get("Cookie"));
+        let redirectLocale: Locale | null = null;
+
+        if (cookieLang && cookieLang !== "en") {
+          redirectLocale = cookieLang;
+        } else if (!cookieLang && !hasLocalizedSameOriginReferer(request, url.origin)) {
+          const detected = matchAcceptLanguage(request.headers.get("Accept-Language"));
+          if (detected && detected !== "en") {
+            redirectLocale = detected;
+          }
+        }
+
+        if (redirectLocale) {
+          const target = new URL(`${localePath(redirectLocale)}${url.search}`, url.origin);
+          return new Response(null, {
+            status: 302,
+            headers: {
+              Location: target.toString(),
+              "Cache-Control": "private, no-store",
+              Vary: "Accept-Language, Cookie"
+            }
+          });
+        }
+      }
+
       const locale = localeFromPath(normalizedPath);
       const dataset = await loadDataset(env);
       const payload = normalizeDataset(dataset, locale);
@@ -174,13 +221,21 @@ export default {
         reactionCount
       });
 
+      const responseHeaders: Record<string, string> = {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Language": locale,
+        "Cache-Control":
+          normalizedPath === "/"
+            ? "private, no-cache"
+            : "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
+      };
+      if (normalizedPath === "/") {
+        responseHeaders.Vary = "Accept-Language, Cookie";
+      }
+
       return new Response(request.method === "HEAD" ? null : html, {
         status: 200,
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "Content-Language": locale,
-          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
-        }
+        headers: responseHeaders
       });
     }
 

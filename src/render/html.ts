@@ -880,7 +880,7 @@ export function renderHomePage({ locale, payload, reactionCount, nowMs = Date.no
   <script>window.__ANTIGRAVITY_I18N__=${clientI18n};window.__ANTIGRAVITY_LOCALE__=${JSON.stringify(
     locale
   )};</script>
-  <script defer src="/site-shell.js?v=2"></script>
+  <script defer src="/site-shell.js?v=3"></script>
   <script defer src="/app.js?v=3"></script>
 </body>
 </html>`;

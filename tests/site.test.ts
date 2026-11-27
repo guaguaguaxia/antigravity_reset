@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import rawSeed from "../src/data/resets.json";
 import { computeStats, normalizeDataset, validateIngestPayload } from "../src/data/repository";
-import { LOCALES } from "../src/i18n";
+import { LOCALES, matchAcceptLanguage } from "../src/i18n";
 import { renderRssFeed } from "../src/render/feed";
 import { renderHomePage } from "../src/render/html";
 import { renderMarkdown } from "../src/render/markdown";
@@ -52,7 +52,7 @@ describe("SSR multi-language rendering & SEO", () => {
       expect(html).not.toContain("antigravity-avatar.svg");
       expect(html).toContain('<link rel="preload" as="font" type="font/woff2" href="/fonts/baloo2-latin.woff2" crossorigin />');
       expect(html).not.toContain("fonts.googleapis.com");
-      expect(html).toContain('<script defer src="/site-shell.js?v=2"></script>');
+      expect(html).toContain('<script defer src="/site-shell.js?v=3"></script>');
       expect(html).toContain('<script defer src="/app.js?v=3"></script>');
       expect(html).toContain(
         '<script defer src="https://www.pvuv.ai/f.js" data-site="kKrRBmM4" data-api="https://in.pvuv.ai"></script>'
@@ -126,6 +126,89 @@ describe("SSR multi-language rendering & SEO", () => {
       "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
     );
     expect(pageRes.headers.get("Vary")).toBeNull();
+  });
+
+  it("matches Accept-Language headers accurately with q weights", () => {
+    expect(matchAcceptLanguage("zh-CN,zh;q=0.9,en;q=0.8")).toBe("zh-CN");
+    expect(matchAcceptLanguage("zh-HK,zh;q=0.9")).toBe("zh-TW");
+    expect(matchAcceptLanguage("zh-Hant,zh;q=0.9")).toBe("zh-TW");
+    expect(matchAcceptLanguage("ja-JP,ja;q=0.9,en-US;q=0.8")).toBe("ja");
+    expect(matchAcceptLanguage("ko-KR,ko;q=0.9")).toBe("ko");
+    expect(matchAcceptLanguage("en-US,en;q=0.9,zh-CN;q=0.8")).toBe("en");
+    expect(matchAcceptLanguage("fr-FR,fr;q=0.9,de;q=0.8")).toBeNull();
+  });
+
+  it("auto-redirects visitors on / by Accept-Language while respecting cookie, referer, crawlers, and explicit locale routes", async () => {
+    const dummyEnv = { ASSETS: { fetch: async () => new Response("Not Found", { status: 404 }) } as unknown as Fetcher };
+
+    const zhRedirect = await worker.fetch(
+      new Request("https://antigravityreset.app/", { headers: { "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" } }),
+      dummyEnv
+    );
+    expect(zhRedirect.status).toBe(302);
+    expect(zhRedirect.headers.get("Location")).toBe("https://antigravityreset.app/zh-CN");
+    expect(zhRedirect.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(zhRedirect.headers.get("Vary")).toBe("Accept-Language, Cookie");
+
+    for (const [header, target] of [
+      ["ja-JP,ja;q=0.9", "https://antigravityreset.app/ja"],
+      ["zh-TW,zh;q=0.9", "https://antigravityreset.app/zh-TW"],
+      ["ko-KR,ko;q=0.9", "https://antigravityreset.app/ko"]
+    ] as const) {
+      const res = await worker.fetch(
+        new Request("https://antigravityreset.app/", { headers: { "Accept-Language": header } }),
+        dummyEnv
+      );
+      expect(res.status).toBe(302);
+      expect(res.headers.get("Location")).toBe(target);
+    }
+
+    const cookieEn = await worker.fetch(
+      new Request("https://antigravityreset.app/", {
+        headers: {
+          "Accept-Language": "zh-CN,zh;q=0.9",
+          Cookie: "antigravity-reset-language=en"
+        }
+      }),
+      dummyEnv
+    );
+    expect(cookieEn.status).toBe(200);
+    expect(cookieEn.headers.get("Content-Language")).toBe("en");
+    expect(cookieEn.headers.get("Cache-Control")).toBe("private, no-cache");
+    expect(cookieEn.headers.get("Vary")).toBe("Accept-Language, Cookie");
+
+    const botRes = await worker.fetch(
+      new Request("https://antigravityreset.app/", {
+        headers: {
+          "Accept-Language": "zh-CN,zh;q=0.9",
+          "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+        }
+      }),
+      dummyEnv
+    );
+    expect(botRes.status).toBe(200);
+    expect(botRes.headers.get("Content-Language")).toBe("en");
+
+    const refererRes = await worker.fetch(
+      new Request("https://antigravityreset.app/", {
+        headers: {
+          "Accept-Language": "zh-CN,zh;q=0.9",
+          Referer: "https://antigravityreset.app/zh-CN"
+        }
+      }),
+      dummyEnv
+    );
+    expect(refererRes.status).toBe(200);
+    expect(refererRes.headers.get("Content-Language")).toBe("en");
+
+    const explicitLocale = await worker.fetch(
+      new Request("https://antigravityreset.app/zh-CN", {
+        headers: { "Accept-Language": "ja-JP,ja;q=0.9" }
+      }),
+      dummyEnv
+    );
+    expect(explicitLocale.status).toBe(200);
+    expect(explicitLocale.headers.get("Content-Language")).toBe("zh-CN");
   });
 
   it("handles empty event list safely in computeStats", () => {

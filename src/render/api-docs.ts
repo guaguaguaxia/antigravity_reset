@@ -92,7 +92,7 @@ Content-Type: application/json
     </main>
     ${renderFooter(locale)}
   </div>
-  <script defer src="/site-shell.js?v=2"></script>
+  <script defer src="/site-shell.js?v=3"></script>
 </body>
 </html>`;
 }

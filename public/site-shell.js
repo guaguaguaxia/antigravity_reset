@@ -113,8 +113,22 @@
     });
   }
 
+  function enhanceLanguagePersistence(scope) {
+    scope.querySelectorAll(".site-footer-langs a[lang], .language-menu a[lang]").forEach((link) => {
+      if (link.dataset.langEnhanced) return;
+      link.dataset.langEnhanced = "1";
+      link.addEventListener("click", () => {
+        const lang = link.getAttribute("lang");
+        if (!lang) return;
+        const secure = window.location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = `antigravity-reset-language=${encodeURIComponent(lang)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+      });
+    });
+  }
+
   function enhance(scope = document) {
     enhanceLanguageMenu(scope);
+    enhanceLanguagePersistence(scope);
     enhancePresence(scope);
   }
 
